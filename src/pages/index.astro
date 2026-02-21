@@ -188,7 +188,7 @@ Notes: 3
       background:rgba(15,23,42,0.92); backdrop-filter:blur(8px);
       color:#e2e8f0; font-size:13px; font-family:system-ui,sans-serif;
       border-bottom:1px solid rgba(255,255,255,0.06);
-      opacity:0; animation:aBar 13s ease-in-out infinite;
+      opacity:0; animation:aBar 14s ease-in-out infinite;
     }
     .demo-bar b { color:var(--amber); }
     .demo-bar-info { color:#94a3b8; font-size:12px; }
@@ -204,14 +204,14 @@ Notes: 3
     /* Pin on commented element */
     .demo-pin {
       position:absolute; top:-10px; right:-10px; font-size:14px; line-height:1; user-select:none; z-index:2;
-      opacity:0; animation:aPin 13s ease-in-out infinite;
+      opacity:0; animation:aPin 14s ease-in-out infinite;
     }
 
     /* Heading — animates: transparent → blue (hover) → amber (saved) */
-    .anim-h { outline:2px solid transparent; outline-offset:2px; position:relative; animation:aH 13s ease-in-out infinite; }
+    .anim-h { outline:2px solid transparent; outline-offset:2px; position:relative; animation:aH 14s ease-in-out infinite; }
 
     /* Paragraph — animates: transparent → blue (hover) */
-    .anim-p { outline:2px solid transparent; outline-offset:2px; animation:aP 13s ease-in-out infinite; }
+    .anim-p { outline:2px solid transparent; outline-offset:2px; position:relative; animation:aP 14s ease-in-out infinite; }
 
     /* Comment popup — matches real product */
     .demo-popup {
@@ -221,8 +221,8 @@ Notes: 3
       box-shadow:0 8px 32px rgba(0,0,0,0.4);
       opacity:0;
     }
-    .anim-pop1 { animation:aPop1 13s ease-in-out infinite; }
-    .anim-pop2 { animation:aPop2 13s ease-in-out infinite; }
+    .anim-pop1 { animation:aPop1 14s ease-in-out infinite; }
+    .anim-pop2 { animation:aPop2 14s ease-in-out infinite; }
     .demo-ta {
       background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:4px;
       padding:8px; font:13px/1.4 system-ui,sans-serif; width:100%;
@@ -232,38 +232,87 @@ Notes: 3
     .demo-popup-cn { background:#475569; }
     .demo-popup-sv { background:#2563eb; }
 
-    /* ===== DEMO ANIMATION — 13s cycle ===== */
-    /* 0s start → 0.5s toolbar → 1.5s blue heading → 3s popup1 → 5s save+pin → 6.5s blue para → 8s popup2 → 11s hold → 12s fade → 13s loop */
+    /* Cursor */
+    .demo-cursor {
+      position:absolute; z-index:20; pointer-events:none;
+      opacity:0; animation:aCursor 14s ease-in-out infinite;
+    }
+    .demo-cursor::after {
+      content:''; display:block;
+      border-left:8px solid #fff; border-top:4px solid transparent;
+      border-bottom:4px solid transparent; border-right:4px solid transparent;
+      transform:rotate(-30deg); filter:drop-shadow(0 1px 3px rgba(0,0,0,.7));
+    }
+
+    /* Second pin (for paragraph) */
+    .demo-pin2 { animation:aPin2 14s ease-in-out infinite; }
+
+    /* Output panel — "pasted into AI" */
+    .demo-output {
+      margin-top:14px; background:var(--surface); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden;
+      box-shadow:0 0 60px rgba(59,130,246,0.03),0 15px 30px rgba(0,0,0,0.3);
+      opacity:0; animation:aOutput 14s ease-in-out infinite;
+    }
+    .demo-output-body {
+      padding:16px 20px; font:12px/1.65 var(--mono); color:var(--text);
+      max-height:160px; overflow:hidden;
+    }
+    .demo-output-body .prompt { color:var(--blue); }
+    .demo-output-body .md { color:var(--text-bright); }
+    .demo-output-body .mdd { color:var(--text-dim); }
+
+    /* ===== DEMO ANIMATION — 14s cycle ===== */
+    /* 0s toolbar → 1.5s click heading → 3s popup1 → 4.5s save → 5.5s click para → 7s popup2 → 8.5s save → 9.5s output panel → 12s hold → 13s fade */
     @keyframes aBar {
-      0%,3% { opacity:0; transform:translateY(-8px); }
-      7%,88% { opacity:1; transform:translateY(0); }
-      94%,100% { opacity:0; }
+      0%,2% { opacity:0; transform:translateY(-8px); }
+      5%,90% { opacity:1; transform:translateY(0); }
+      95%,100% { opacity:0; }
     }
     @keyframes aH {
-      0%,10% { outline-color:transparent; }
-      14%,36% { outline-color:#3b82f6; }
-      42%,88% { outline-color:#f59e0b; }
-      94%,100% { outline-color:transparent; }
+      0%,9% { outline-color:transparent; }
+      12%,26% { outline-color:#3b82f6; }
+      32%,90% { outline-color:#f59e0b; }
+      95%,100% { outline-color:transparent; }
     }
     @keyframes aPin {
-      0%,38% { opacity:0; transform:scale(0.6); }
-      44%,88% { opacity:1; transform:scale(1); }
-      94%,100% { opacity:0; }
+      0%,28% { opacity:0; transform:scale(0.6); }
+      34%,90% { opacity:1; transform:scale(1); }
+      95%,100% { opacity:0; }
     }
     @keyframes aPop1 {
-      0%,22% { opacity:0; transform:translateY(6px); }
-      26%,36% { opacity:1; transform:translateY(0); }
-      40%,100% { opacity:0; transform:translateY(0); }
+      0%,18% { opacity:0; transform:translateY(6px); }
+      22%,27% { opacity:1; transform:translateY(0); }
+      31%,100% { opacity:0; }
     }
     @keyframes aP {
-      0%,48% { outline-color:transparent; }
-      53%,88% { outline-color:#3b82f6; }
-      94%,100% { outline-color:transparent; }
+      0%,38% { outline-color:transparent; }
+      42%,55% { outline-color:#3b82f6; }
+      61%,90% { outline-color:#f59e0b; }
+      95%,100% { outline-color:transparent; }
+    }
+    @keyframes aPin2 {
+      0%,57% { opacity:0; transform:scale(0.6); }
+      63%,90% { opacity:1; transform:scale(1); }
+      95%,100% { opacity:0; }
     }
     @keyframes aPop2 {
-      0%,60% { opacity:0; transform:translateY(6px); }
-      65%,88% { opacity:1; transform:translateY(0); }
-      94%,100% { opacity:0; }
+      0%,47% { opacity:0; transform:translateY(6px); }
+      51%,56% { opacity:1; transform:translateY(0); }
+      60%,100% { opacity:0; }
+    }
+    @keyframes aCursor {
+      0%,4% { top:35px; left:230px; opacity:0; }
+      7% { top:35px; left:230px; opacity:1; }
+      12%,28% { top:62px; left:150px; opacity:1; }
+      36% { top:62px; left:150px; opacity:1; }
+      42%,57% { top:100px; left:120px; opacity:1; }
+      63%,100% { opacity:0; }
+    }
+    @keyframes aOutput {
+      0%,66% { opacity:0; transform:translateY(12px); }
+      72%,87% { opacity:1; transform:translateY(0); }
+      93%,100% { opacity:0; }
     }
 
     /* ===== PROBLEM ===== */
@@ -438,7 +487,7 @@ Notes: 3
               </div>
             </div>
             <div class="demo-el">
-              <div class="fake-p anim-p">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.</div>
+              <div class="fake-p anim-p">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.<span class="demo-pin demo-pin2">📌</span></div>
               <div class="demo-popup anim-pop2">
                 <div class="demo-ta">Too generic. Mention actual benchmarks.</div>
                 <div class="demo-popup-row">
@@ -452,6 +501,27 @@ Notes: 3
               <div class="fake-card"><h4>AI-Powered</h4><p>Built-in assistant that learns your codebase.</p></div>
             </div>
           </div>
+          <div class="demo-cursor"></div>
+        </div>
+      </div>
+
+      <div class="demo-output">
+        <div class="demo-chrome">
+          <span class="demo-dot" style="background:var(--red);"></span>
+          <span class="demo-dot" style="background:var(--amber);"></span>
+          <span class="demo-dot" style="background:var(--green);"></span>
+          <div class="demo-url" style="color:var(--text);">Cursor</div>
+        </div>
+        <div class="demo-output-body">
+          <span class="prompt">Paste from clipboard:</span><br/><br/>
+          <span class="md"># Tack: Page Review</span><br/>
+          <span class="mdd">Date: 2026-02-21 &middot; Notes: 2</span><br/><br/>
+          <span class="md">## 1.</span><br/>
+          <span class="mdd">**Where:** section "Hero" &rarr; h1</span><br/>
+          <span class="md">**Note:** Make this heading bigger and bolder</span><br/><br/>
+          <span class="md">## 2.</span><br/>
+          <span class="mdd">**Where:** section "Hero" &rarr; p</span><br/>
+          <span class="md">**Note:** Too generic. Mention actual benchmarks.</span>
         </div>
       </div>
     </div>

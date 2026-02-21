@@ -1,0 +1,10 @@
+{
+  "name": "tack.js",
+  "version": "0.1.0",
+  "description": "Click. Comment. Feed to AI. Ultra-lightweight webpage annotation tool.",
+  "main": "tack.js",
+  "files": ["tack.js"],
+  "keywords": ["annotation", "feedback", "vibe-coding", "LLM", "AI", "review"],
+  "author": "kibkalo.com",
+  "license": "MIT"
+}

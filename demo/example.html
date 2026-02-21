@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acme Corp — Tack Demo</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    header {
+      background: #2563eb;
+      color: #fff;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      opacity: 0.85;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #1e3a5f;
+    }
+
+    section p {
+      margin-bottom: 1rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #2563eb;
+    }
+
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .pricing-table th,
+    .pricing-table td {
+      border: 1px solid #e2e8f0;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    .pricing-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 480px;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+    }
+
+    .contact-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .contact-form button {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.7rem 1.5rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .contact-form button:hover {
+      background: #1d4ed8;
+    }
+
+    footer {
+      background: #1e293b;
+      color: #94a3b8;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Acme Corp</h1>
+    <p>Building the future, one widget at a time.</p>
+  </header>
+
+  <main>
+    <section id="about">
+      <h2>About Us</h2>
+      <p>Acme Corp has been a leading provider of innovative solutions since 2020. We specialize in creating tools that help teams work smarter and ship faster.</p>
+      <p>Our mission is simple: remove friction from every workflow so people can focus on what matters most.</p>
+    </section>
+
+    <section id="features">
+      <h2>Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>Lightning Fast</h3>
+          <p>Our platform loads in under 100ms. No heavy frameworks, no bloat — just speed.</p>
+        </div>
+        <div class="feature-card">
+          <h3>AI-Powered</h3>
+          <p>Built-in AI assistant that learns your workflow and suggests improvements automatically.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Team Collaboration</h3>
+          <p>Real-time editing, commenting, and review tools designed for distributed teams.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Enterprise Ready</h3>
+          <p>SOC2 compliant, SSO support, and role-based access controls out of the box.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <h2>Pricing</h2>
+      <p>Simple, transparent pricing that scales with your team.</p>
+      <table class="pricing-table">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Price</th>
+            <th>Includes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Starter</td>
+            <td>Free</td>
+            <td>Up to 3 users, basic features</td>
+          </tr>
+          <tr>
+            <td>Pro</td>
+            <td>$29/mo</td>
+            <td>Unlimited users, AI features, priority support</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td>Custom</td>
+            <td>SSO, SLA, dedicated account manager</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>Have questions? Drop us a line and we will get back to you within 24 hours.</p>
+      <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent!');">
+        <input type="text" placeholder="Your name" required>
+        <input type="email" placeholder="Email address" required>
+        <textarea placeholder="Your message"></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Acme Corp. All rights reserved.</p>
+  </footer>
+
+  <script src="../tack.js"></script>
+</body>
+</html>

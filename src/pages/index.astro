@@ -182,72 +182,42 @@ Notes: 3
     .fake-card h4 { font:600 12px var(--sans); color:var(--text-bright); margin-bottom:4px; }
     .fake-card p { font-size:11px; color:var(--text-dim); line-height:1.4; }
 
-    .demo-cursor {
-      position:absolute; width:16px; height:16px; z-index:10;
-      animation:cursorMove 9s ease-in-out infinite; pointer-events:none;
+    /* Tack toolbar — matches real product */
+    .demo-bar {
+      display:flex; align-items:center; gap:10px; height:36px; padding:0 14px;
+      background:rgba(15,23,42,0.92); backdrop-filter:blur(8px);
+      color:#e2e8f0; font-size:13px; font-family:system-ui,sans-serif;
+      border-bottom:1px solid rgba(255,255,255,0.06);
     }
-    .demo-cursor::after {
-      content:''; position:absolute; top:0; left:0;
-      border-left:7px solid #fff; border-top:3px solid transparent;
-      border-bottom:3px solid transparent; border-right:3px solid transparent;
-      transform:rotate(-30deg); filter:drop-shadow(0 1px 4px rgba(0,0,0,.6));
+    .demo-bar b { color:var(--amber); }
+    .demo-bar-info { color:#94a3b8; font-size:12px; }
+    .demo-bar-sp { flex:1; }
+    .demo-bar-btn {
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.08);
+      color:#cbd5e1; padding:3px 10px; border-radius:4px; font-size:12px; font-family:inherit;
     }
-    .demo-highlight {
-      position:absolute; border:2px solid var(--blue); background:rgba(59,130,246,0.05);
-      border-radius:4px; opacity:0; pointer-events:none;
-      animation:highlightPulse 9s ease-in-out infinite;
-    }
-    .demo-comment {
-      position:absolute; background:#1e293b; border:1px solid #334155; border-radius:8px;
-      padding:11px 16px; font:400 12px/1.4 var(--sans); color:var(--text-bright);
-      width:230px; opacity:0; pointer-events:none;
-      animation:commentAppear 9s ease-in-out infinite;
-      box-shadow:0 12px 32px rgba(0,0,0,.5);
-    }
-    .demo-comment::before { content:'📌'; margin-right:6px; }
-    .demo-pin { position:absolute; font-size:14px; opacity:0; animation:pinAppear 9s ease-in-out infinite; pointer-events:none; }
 
-    .demo-toolbar {
-      display:flex; align-items:center; gap:8px; padding:7px 14px;
-      background:rgba(15,23,42,.96); backdrop-filter:blur(6px); border-radius:8px;
-      font:400 12px var(--mono); color:var(--text);
-      position:absolute; top:48px; left:16px; right:16px; z-index:5;
-      opacity:0; animation:toolbarIn 9s ease-in-out infinite;
-    }
-    .demo-toolbar b { color:var(--amber); font-weight:600; }
-    .demo-toolbar .sp { flex:1; }
-    .demo-toolbar .pill { background:rgba(255,255,255,.06); padding:2px 9px; border-radius:4px; font-size:11px; }
+    /* Annotated element — amber outline + pin */
+    .demo-noted { position:relative; outline:2px solid var(--amber)!important; outline-offset:2px; }
+    .demo-pin { position:absolute; top:-10px; right:-10px; font-size:14px; line-height:1; user-select:none; z-index:2; }
 
-    @keyframes cursorMove {
-      0%,8% { top:100px; left:160px; opacity:1; }
-      18% { top:70px; left:200px; opacity:1; }
-      22%,50% { top:70px; left:200px; opacity:0; }
-      56% { top:165px; left:120px; opacity:1; }
-      66%,70% { top:165px; left:120px; opacity:0; }
-      100% { opacity:0; }
+    /* Hover target — blue outline */
+    .demo-hover { outline:2px solid var(--blue)!important; outline-offset:2px; cursor:crosshair; }
+
+    /* Comment popup — matches real product */
+    .demo-popup {
+      background:#1e293b; border:1px solid #334155; border-radius:8px;
+      padding:10px; width:280px; margin-top:10px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4); z-index:3;
     }
-    @keyframes highlightPulse {
-      0%,13% { opacity:0; }
-      16%,26% { opacity:1; top:60px; left:16px; width:500px; height:30px; }
-      30%,50% { opacity:0; }
-      54%,68% { opacity:1; top:150px; left:16px; width:260px; height:56px; }
-      72%,100% { opacity:0; }
+    .demo-ta {
+      background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:4px;
+      padding:8px; font:13px/1.4 system-ui,sans-serif; width:100%;
     }
-    @keyframes commentAppear {
-      0%,20% { opacity:0; transform:translateY(8px); }
-      24% { opacity:1; top:96px; left:140px; transform:translateY(0); }
-      40% { opacity:1; top:96px; left:140px; }
-      44%,100% { opacity:0; }
-    }
-    @keyframes pinAppear {
-      0%,40% { opacity:0; transform:scale(0.5); }
-      44% { opacity:1; top:54px; right:30px; transform:scale(1.15); }
-      48%,100% { opacity:1; top:54px; right:30px; transform:scale(1); }
-    }
-    @keyframes toolbarIn {
-      0%,6% { opacity:0; transform:translateY(-12px); }
-      10%,100% { opacity:1; transform:translateY(0); }
-    }
+    .demo-popup-row { display:flex; gap:6px; margin-top:8px; justify-content:flex-end; }
+    .demo-popup-btn { border:0; padding:4px 12px; border-radius:4px; font:12px system-ui; color:#fff; cursor:default; }
+    .demo-popup-cn { background:#475569; }
+    .demo-popup-sv { background:#2563eb; }
 
     /* ===== PROBLEM ===== */
     .problem { padding:100px 0; }
@@ -398,26 +368,32 @@ Notes: 3
           <span class="demo-dot" style="background:var(--green);"></span>
           <div class="demo-url">mysite.com/landing<em>#tack</em></div>
         </div>
+        <div class="demo-bar">
+          <b>📌 Tack</b>
+          <span class="demo-bar-info">2 here &middot; 3 total &middot; 2 pages</span>
+          <span class="demo-bar-sp"></span>
+          <span class="demo-bar-btn">Copy for AI</span>
+          <span class="demo-bar-btn">↓ .md</span>
+          <span class="demo-bar-btn">Clear</span>
+          <span class="demo-bar-btn">✕</span>
+        </div>
         <div class="demo-body">
-          <div class="demo-toolbar">
-            <b>📌 Tack</b> &middot; 1 note
-            <span class="sp"></span>
-            <span class="pill">Copy for AI</span>
-            <span class="pill">↓ .md</span>
-          </div>
-          <div class="fake-page" style="margin-top:40px;">
+          <div class="fake-page">
             <div class="fake-nav"><span>Acme</span><span>Features</span><span>Pricing</span><span>Contact</span></div>
-            <div class="fake-h">Build faster with Acme</div>
-            <div class="fake-p">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.</div>
-            <div class="fake-cards">
+            <div class="fake-h demo-noted">Build faster with Acme<span class="demo-pin">📌</span></div>
+            <div class="fake-p demo-hover">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.</div>
+            <div class="demo-popup">
+              <div class="demo-ta">Too generic. Mention actual benchmarks.</div>
+              <div class="demo-popup-row">
+                <span class="demo-popup-btn demo-popup-cn">Cancel</span>
+                <span class="demo-popup-btn demo-popup-sv">Save ⌘↵</span>
+              </div>
+            </div>
+            <div class="fake-cards" style="margin-top:14px;">
               <div class="fake-card"><h4>Lightning Fast</h4><p>Sub-100ms response times on every request.</p></div>
               <div class="fake-card"><h4>AI-Powered</h4><p>Built-in assistant that learns your codebase.</p></div>
             </div>
           </div>
-          <div class="demo-cursor"></div>
-          <div class="demo-highlight"></div>
-          <div class="demo-comment">Make this heading bigger and bolder</div>
-          <div class="demo-pin">📌</div>
         </div>
       </div>
     </div>
@@ -599,7 +575,7 @@ Notes: 3
     <div class="wrap">
       <div class="footer-links">
         <a href="https://github.com/Dkibkalo/tack">GitHub</a>
-        <a href="https://ko-fi.com/kibkalo">Buy me a coffee</a>
+        <a href="https://www.npmjs.com/package/tack.js">npm</a>
         <a href="https://kibkalo.com">kibkalo.com</a>
       </div>
       <p>MIT License</p>

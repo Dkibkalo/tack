@@ -89,7 +89,7 @@ Notes: 3
     .wrap { max-width:840px; margin:0 auto; padding:0 24px; }
 
     /* ===== HERO ===== */
-    .hero { padding:130px 0 80px; text-align:center; position:relative; }
+    .hero { padding:80px 0 50px; text-align:center; position:relative; }
     .hero::after {
       content:''; position:absolute; top:-120px; left:50%; transform:translateX(-50%);
       width:800px; height:700px;
@@ -188,6 +188,7 @@ Notes: 3
       background:rgba(15,23,42,0.92); backdrop-filter:blur(8px);
       color:#e2e8f0; font-size:13px; font-family:system-ui,sans-serif;
       border-bottom:1px solid rgba(255,255,255,0.06);
+      opacity:0; animation:aBar 13s ease-in-out infinite;
     }
     .demo-bar b { color:var(--amber); }
     .demo-bar-info { color:#94a3b8; font-size:12px; }
@@ -197,19 +198,31 @@ Notes: 3
       color:#cbd5e1; padding:3px 10px; border-radius:4px; font-size:12px; font-family:inherit;
     }
 
-    /* Annotated element — amber outline + pin */
-    .demo-noted { position:relative; outline:2px solid var(--amber)!important; outline-offset:2px; }
-    .demo-pin { position:absolute; top:-10px; right:-10px; font-size:14px; line-height:1; user-select:none; z-index:2; }
+    /* Wrapper for animated elements */
+    .demo-el { position:relative; }
 
-    /* Hover target — blue outline */
-    .demo-hover { outline:2px solid var(--blue)!important; outline-offset:2px; cursor:crosshair; }
+    /* Pin on commented element */
+    .demo-pin {
+      position:absolute; top:-10px; right:-10px; font-size:14px; line-height:1; user-select:none; z-index:2;
+      opacity:0; animation:aPin 13s ease-in-out infinite;
+    }
+
+    /* Heading — animates: transparent → blue (hover) → amber (saved) */
+    .anim-h { outline:2px solid transparent; outline-offset:2px; position:relative; animation:aH 13s ease-in-out infinite; }
+
+    /* Paragraph — animates: transparent → blue (hover) */
+    .anim-p { outline:2px solid transparent; outline-offset:2px; animation:aP 13s ease-in-out infinite; }
 
     /* Comment popup — matches real product */
     .demo-popup {
+      position:absolute; top:100%; left:0; margin-top:8px; z-index:10;
       background:#1e293b; border:1px solid #334155; border-radius:8px;
-      padding:10px; width:280px; margin-top:10px;
-      box-shadow:0 8px 32px rgba(0,0,0,0.4); z-index:3;
+      padding:10px; width:280px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      opacity:0;
     }
+    .anim-pop1 { animation:aPop1 13s ease-in-out infinite; }
+    .anim-pop2 { animation:aPop2 13s ease-in-out infinite; }
     .demo-ta {
       background:#0f172a; color:#e2e8f0; border:1px solid #334155; border-radius:4px;
       padding:8px; font:13px/1.4 system-ui,sans-serif; width:100%;
@@ -218,6 +231,40 @@ Notes: 3
     .demo-popup-btn { border:0; padding:4px 12px; border-radius:4px; font:12px system-ui; color:#fff; cursor:default; }
     .demo-popup-cn { background:#475569; }
     .demo-popup-sv { background:#2563eb; }
+
+    /* ===== DEMO ANIMATION — 13s cycle ===== */
+    /* 0s start → 0.5s toolbar → 1.5s blue heading → 3s popup1 → 5s save+pin → 6.5s blue para → 8s popup2 → 11s hold → 12s fade → 13s loop */
+    @keyframes aBar {
+      0%,3% { opacity:0; transform:translateY(-8px); }
+      7%,88% { opacity:1; transform:translateY(0); }
+      94%,100% { opacity:0; }
+    }
+    @keyframes aH {
+      0%,10% { outline-color:transparent; }
+      14%,36% { outline-color:#3b82f6; }
+      42%,88% { outline-color:#f59e0b; }
+      94%,100% { outline-color:transparent; }
+    }
+    @keyframes aPin {
+      0%,38% { opacity:0; transform:scale(0.6); }
+      44%,88% { opacity:1; transform:scale(1); }
+      94%,100% { opacity:0; }
+    }
+    @keyframes aPop1 {
+      0%,22% { opacity:0; transform:translateY(6px); }
+      26%,36% { opacity:1; transform:translateY(0); }
+      40%,100% { opacity:0; transform:translateY(0); }
+    }
+    @keyframes aP {
+      0%,48% { outline-color:transparent; }
+      53%,88% { outline-color:#3b82f6; }
+      94%,100% { outline-color:transparent; }
+    }
+    @keyframes aPop2 {
+      0%,60% { opacity:0; transform:translateY(6px); }
+      65%,88% { opacity:1; transform:translateY(0); }
+      94%,100% { opacity:0; }
+    }
 
     /* ===== PROBLEM ===== */
     .problem { padding:100px 0; }
@@ -315,7 +362,7 @@ Notes: 3
 
     /* ===== RESPONSIVE ===== */
     @media(max-width:768px) {
-      .hero { padding:100px 0 60px; }
+      .hero { padding:64px 0 40px; }
       section { padding:72px 0; }
       .steps { grid-template-columns:1fr 1fr; }
       .pages-grid { grid-template-columns:1fr; }
@@ -380,13 +427,24 @@ Notes: 3
         <div class="demo-body">
           <div class="fake-page">
             <div class="fake-nav"><span>Acme</span><span>Features</span><span>Pricing</span><span>Contact</span></div>
-            <div class="fake-h demo-noted">Build faster with Acme<span class="demo-pin">📌</span></div>
-            <div class="fake-p demo-hover">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.</div>
-            <div class="demo-popup">
-              <div class="demo-ta">Too generic. Mention actual benchmarks.</div>
-              <div class="demo-popup-row">
-                <span class="demo-popup-btn demo-popup-cn">Cancel</span>
-                <span class="demo-popup-btn demo-popup-sv">Save ⌘↵</span>
+            <div class="demo-el">
+              <div class="fake-h anim-h">Build faster with Acme<span class="demo-pin">📌</span></div>
+              <div class="demo-popup anim-pop1">
+                <div class="demo-ta">Make this heading bigger and bolder</div>
+                <div class="demo-popup-row">
+                  <span class="demo-popup-btn demo-popup-cn">Cancel</span>
+                  <span class="demo-popup-btn demo-popup-sv">Save ⌘↵</span>
+                </div>
+              </div>
+            </div>
+            <div class="demo-el">
+              <div class="fake-p anim-p">Our platform helps teams ship 10x faster with AI-powered development tools and real-time collaboration.</div>
+              <div class="demo-popup anim-pop2">
+                <div class="demo-ta">Too generic. Mention actual benchmarks.</div>
+                <div class="demo-popup-row">
+                  <span class="demo-popup-btn demo-popup-cn">Cancel</span>
+                  <span class="demo-popup-btn demo-popup-sv">Save ⌘↵</span>
+                </div>
               </div>
             </div>
             <div class="fake-cards" style="margin-top:14px;">

@@ -7,6 +7,10 @@
   "keywords": ["annotation", "feedback", "vibe-coding", "LLM", "AI", "review"],
   "author": "kibkalo.com",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dkibkalo/tack"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "cp tack.js public/tack.js && astro build",

@@ -6,5 +6,13 @@
   "files": ["tack.js"],
   "keywords": ["annotation", "feedback", "vibe-coding", "LLM", "AI", "review"],
   "author": "kibkalo.com",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "cp tack.js public/tack.js && astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "astro": "^5.0.0"
+  }
 }

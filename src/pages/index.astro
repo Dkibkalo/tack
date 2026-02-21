@@ -1,0 +1,620 @@
+---
+const bookmarklet = `javascript:void(function(){if(window.__tack_active)return;window.__tack_activate=true;var s=document.createElement('script');s.src='https://unpkg.com/tack.js';document.head.appendChild(s);window.__tack_active=true;}())`
+
+const exportExample = `# Tack: Page Review
+Date: 2026-02-21
+Notes: 3
+
+---
+
+## 1.
+**Where:** section "Hero" → \`h1\`
+**Element text:** "Welcome to Acme Corp"
+**Selector:** \`header > h1\`
+**Note:** Make this bigger, add gradient text
+
+## 2.
+**Where:** section "Features" → \`p\`
+**Element text:** "Our platform loads in under 100ms..."
+**Selector:** \`main > section:nth-of-type(2) > div > p:nth-of-type(1)\`
+**Note:** Too generic. Mention actual benchmarks.
+
+## 3.
+**Where:** section "Pricing" → \`td:nth-of-type(2)\`
+**Element text:** "$29/mo"
+**Selector:** \`table > tbody > tr:nth-of-type(2) > td:nth-of-type(2)\`
+**Note:** Change to $19/mo, we lowered the price`
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tack — Click. Comment. Feed to AI.</title>
+  <meta name="description" content="Ultra-lightweight tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies." />
+  <meta property="og:title" content="Tack — Click. Comment. Feed to AI." />
+  <meta property="og:description" content="Annotate any webpage. Export for your LLM. One script tag." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="/logo.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #060a12;
+      --surface: #0d1321;
+      --border: #1a2236;
+      --text: #c8d3e6;
+      --text-dim: #5a6a85;
+      --text-bright: #eaf0f9;
+      --amber: #f59e0b;
+      --amber-dim: rgba(245, 158, 11, 0.12);
+      --blue: #3b82f6;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* --- Noise overlay --- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* --- Container --- */
+    .wrap { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+    /* --- Hero --- */
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--amber-dim);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 100px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--amber);
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(42px, 6vw, 64px);
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span { color: var(--amber); }
+
+    .hero .tagline {
+      font-size: clamp(18px, 2.5vw, 22px);
+      color: var(--text-dim);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+    }
+
+    /* --- Code block CTA --- */
+    .code-cta {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      max-width: 560px;
+      margin: 0 auto 24px;
+      text-align: left;
+      position: relative;
+      font-family: var(--mono);
+      font-size: 14px;
+    }
+
+    .code-cta .label {
+      font-family: var(--sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .code-cta code {
+      color: var(--text-bright);
+      display: block;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .code-cta code .tag { color: var(--blue); }
+    .code-cta code .attr { color: var(--amber); }
+    .code-cta code .str { color: #34d399; }
+
+    .code-cta .copy-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-dim);
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font: 12px var(--mono);
+      transition: all 0.2s;
+    }
+
+    .code-cta .copy-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    /* --- Buttons --- */
+    .btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font: 500 14px var(--sans);
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--amber);
+      color: #0a0a0a;
+    }
+
+    .btn-primary:hover { background: #d97706; }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text-bright); }
+
+    .btn-bookmark {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      color: var(--text-dim);
+      font-size: 13px;
+      padding: 8px 16px;
+      cursor: grab;
+    }
+
+    .btn-bookmark:hover { border-color: var(--amber); color: var(--amber); }
+
+    /* --- Section --- */
+    section { padding: 80px 0; }
+
+    section + section { border-top: 1px solid var(--border); }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--amber);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: var(--mono);
+      font-size: clamp(24px, 3vw, 32px);
+      font-weight: 600;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .section-desc {
+      color: var(--text-dim);
+      max-width: 520px;
+      margin-bottom: 40px;
+    }
+
+    /* --- Steps --- */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 20px;
+    }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px 20px;
+      position: relative;
+    }
+
+    .step-num {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    .step h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* --- Export preview --- */
+    .export-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .export-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .export-header .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-r { background: #ef4444; }
+    .dot-y { background: #f59e0b; }
+    .dot-g { background: #22c55e; }
+
+    .export-body {
+      padding: 20px;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      overflow-x: auto;
+      max-height: 360px;
+    }
+
+    /* --- Comparison --- */
+    .comparison {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .comparison th, .comparison td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison th {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .comparison td:first-child {
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    .comparison .us {
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    .comparison .yes { color: #22c55e; }
+    .comparison .no { color: var(--text-dim); opacity: 0.5; }
+
+    /* --- Try it banner --- */
+    .try-it {
+      text-align: center;
+      padding: 60px 0;
+      background: linear-gradient(180deg, transparent, rgba(245,158,11,0.04));
+    }
+
+    .try-it h2 {
+      font-family: var(--mono);
+      font-size: 28px;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .try-it p {
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+
+    /* --- Footer --- */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    footer a { color: var(--text); text-decoration: none; }
+    footer a:hover { color: var(--amber); }
+
+    .footer-links { display: flex; gap: 20px; justify-content: center; margin-bottom: 12px; }
+
+    /* --- Responsive --- */
+    @media (max-width: 640px) {
+      .hero { padding: 80px 0 60px; }
+      section { padding: 60px 0; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .comparison { font-size: 12px; }
+      .comparison th, .comparison td { padding: 8px 10px; }
+    }
+
+    /* --- Animations --- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-badge, .hero h1, .hero .tagline, .code-cta, .hero .btns {
+      animation: fadeUp 0.6s ease-out both;
+    }
+    .hero h1 { animation-delay: 0.1s; }
+    .hero .tagline { animation-delay: 0.2s; }
+    .code-cta { animation-delay: 0.3s; }
+    .hero .btns { animation-delay: 0.4s; }
+  </style>
+</head>
+
+<body>
+  <!-- Hero -->
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-badge">📌 open source · MIT license</div>
+      <h1>Click. Comment.<br/><span>Feed to AI.</span></h1>
+      <p class="tagline">Annotate any webpage and export for your LLM. One script tag. Zero dependencies. Under 4KB.</p>
+
+      <div class="code-cta">
+        <div class="label">Add to your HTML</div>
+        <code>&lt;<span class="tag">script</span> <span class="attr">src</span>=<span class="str">"https://unpkg.com/tack.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;</code>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('<script src=&quot;https://unpkg.com/tack.js&quot;></script>');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)">Copy</button>
+      </div>
+
+      <div class="btns">
+        <button class="btn btn-primary" onclick="location.hash='tack'">Try it on this page</button>
+        <a class="btn btn-ghost" href="https://github.com/nicekibkalo/tack" target="_blank">GitHub</a>
+        <a class="btn btn-bookmark" href={bookmarklet} title="Drag this to your bookmarks bar">📌 Bookmarklet — drag me</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">How it works</div>
+      <div class="section-title">Four steps. Thirty seconds.</div>
+      <p class="section-desc">Add one line of code. Append #tack to your URL. Click what's wrong. Feed to AI.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Add script</h3>
+          <p>One &lt;script&gt; tag. Sleeps until you need it — zero overhead.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Activate</h3>
+          <p>Add <code style="color:var(--amber)">#tack</code> to URL. No page reload needed.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Click & comment</h3>
+          <p>Click any element. Write what should change. Repeat across pages.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Feed to AI</h3>
+          <p>Copy to clipboard or download .md. Paste into ChatGPT, Claude, or Cursor.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-page -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">Multi-page</div>
+      <div class="section-title">One review. Many pages.</div>
+      <p class="section-desc">Navigate between pages — comments accumulate. Export collects everything across all pages into one Markdown file, organized by URL.</p>
+
+      <div class="steps" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="step">
+          <div class="step-num">📌 3 notes</div>
+          <h3>/homepage</h3>
+          <p>"Make hero bigger" "Fix nav link" "Add CTA"</p>
+        </div>
+        <div class="step">
+          <div class="step-num">📌 2 notes</div>
+          <h3>/pricing</h3>
+          <p>"Wrong price on Pro" "Add annual toggle"</p>
+        </div>
+        <div class="step">
+          <div class="step-num">📌 1 note</div>
+          <h3>/about</h3>
+          <p>"Update team photo"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Export format -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">Export</div>
+      <div class="section-title">LLM-optimized output</div>
+      <p class="section-desc">Each note includes three anchors: element text, section heading, and CSS selector. Your AI finds the exact element every time.</p>
+
+      <div class="export-preview">
+        <div class="export-header">
+          <span class="dot dot-r"></span>
+          <span class="dot dot-y"></span>
+          <span class="dot dot-g"></span>
+          <span style="margin-left: 8px;">tack-review-2026-02-21.md</span>
+        </div>
+        <div class="export-body">{exportExample}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison -->
+  <section>
+    <div class="wrap">
+      <div class="section-label">Comparison</div>
+      <div class="section-title">Why Tack?</div>
+
+      <table class="comparison">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="us">Tack</th>
+            <th>Vibe Annotations</th>
+            <th>Drawbridge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Install</td>
+            <td class="us">1 script tag</td>
+            <td>Extension + MCP server</td>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <td>Any page?</td>
+            <td class="us yes">Yes (bookmarklet)</td>
+            <td class="no">Localhost only</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Multi-page</td>
+            <td class="us yes">Yes</td>
+            <td class="no">Yes</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>Size</td>
+            <td class="us">&lt;4KB</td>
+            <td>Extension + server</td>
+            <td>Extension</td>
+          </tr>
+          <tr>
+            <td>Zero config</td>
+            <td class="us yes">Yes</td>
+            <td class="no">No</td>
+            <td class="no">No</td>
+          </tr>
+          <tr>
+            <td>Open source</td>
+            <td class="us">MIT</td>
+            <td>MIT</td>
+            <td class="no">Custom</td>
+          </tr>
+          <tr>
+            <td>Price</td>
+            <td class="us">Free</td>
+            <td>Free</td>
+            <td>Free</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Try it -->
+  <section class="try-it">
+    <div class="wrap">
+      <h2>Try it right now</h2>
+      <p>Click the button below to activate Tack on this page. Click any element to annotate it.</p>
+      <button class="btn btn-primary" onclick="location.hash='tack'" style="font-size: 16px; padding: 14px 32px;">
+        📌 Activate Tack on this page
+      </button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="wrap">
+      <div class="footer-links">
+        <a href="https://github.com/nicekibkalo/tack">GitHub</a>
+        <a href="https://ko-fi.com/kibkalo">Support on Ko-fi</a>
+        <a href="https://kibkalo.com">kibkalo.com</a>
+      </div>
+      <p>MIT License &middot; Made for vibe coders everywhere</p>
+    </div>
+  </footer>
+
+  <script src="/tack.js" is:inline></script>
+</body>
+</html>

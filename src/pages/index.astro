@@ -1,5 +1,5 @@
 ---
-const bookmarklet = `javascript:void(function(){if(window.__tack_active)return;window.__tack_activate=true;var s=document.createElement('script');s.src='https://gettack.dev/tack.js';document.head.appendChild(s);window.__tack_active=true;}())`
+const bookmarklet = `javascript:void(function(){if(window.__tack_active)return;window.__tack_activate=true;var s=document.createElement('script');s.src='https://unpkg.com/@kibkalo/tack';document.head.appendChild(s);window.__tack_active=true;}())`
 
 const exportExample = `# Tack: Page Review
 Date: 2026-02-21
@@ -462,8 +462,8 @@ Notes: 3
 
       <div class="code-cta">
         <div class="lbl">Add to your HTML</div>
-        <code>&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://gettack.dev/tack.js"</span>&gt;&lt;/<span class="t">script</span>&gt;</code>
-        <button class="cp" onclick="navigator.clipboard.writeText('<script src=&quot;https://gettack.dev/tack.js&quot;></script>');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2e3)">Copy</button>
+        <code>&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://unpkg.com/@kibkalo/tack"</span>&gt;&lt;/<span class="t">script</span>&gt;</code>
+        <button class="cp" onclick="navigator.clipboard.writeText('<script src=&quot;https://unpkg.com/@kibkalo/tack&quot;></script>');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2e3)">Copy</button>
       </div>
 
       <div class="hero-btns">
@@ -707,7 +707,7 @@ Notes: 3
 
       <div class="dev-code reveal">
         <span class="cm">&lt;!-- It's fine. Tack sleeps until #tack. --&gt;</span><br/>
-        &lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://gettack.dev/tack.js"</span>&gt;&lt;/<span class="t">script</span>&gt;
+        &lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://unpkg.com/@kibkalo/tack"</span>&gt;&lt;/<span class="t">script</span>&gt;
       </div>
     </div>
   </section>
@@ -729,7 +729,7 @@ Notes: 3
     <div class="wrap">
       <div class="footer-links">
         <a href="https://github.com/Dkibkalo/tack">GitHub</a>
-        <a href="https://www.npmjs.com/package/tack.js">npm</a>
+        <a href="https://www.npmjs.com/package/@kibkalo/tack">npm</a>
         <a href="https://kibkalo.com">kibkalo.com</a>
       </div>
       <p>MIT License</p>

@@ -9,7 +9,7 @@ Ultra-lightweight (&lt;4KB) tool to annotate any webpage and export comments for
 Add one line to your HTML:
 
 ```html
-<script src="https://unpkg.com/tack.js"></script>
+<script src="https://unpkg.com/@kibkalo/tack"></script>
 ```
 
 Then add `#tack` to your URL:

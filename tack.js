@@ -8,7 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
-  var VER = '0.3.4', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
+  var VER = '0.3.5', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -187,7 +187,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     shadow.appendChild(catcher)
     catcher.addEventListener('mousemove', onMove)
     catcher.addEventListener('mousedown', onDown)
-    catcher.addEventListener('mouseleave', () => { if (label) label.style.display = 'none' })
+    catcher.addEventListener('mouseleave', () => { hoverEl = null; clearHover() })
     label = D.createElement('div'); label.className = 'lb'; label.style.display = 'none'
     shadow.appendChild(label)
     D.body.appendChild(host)

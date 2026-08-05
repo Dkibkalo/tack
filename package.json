@@ -1,6 +1,6 @@
 {
   "name": "@kibkalo/tack",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Click. Comment. Feed to AI. Ultra-lightweight webpage annotation tool.",
   "main": "tack.min.js",
   "unpkg": "tack.min.js",

@@ -8,7 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
-  var VER = '0.3.3', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
+  var VER = '0.3.4', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -788,6 +788,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
   }
   function unb64 (s) {
     s = String(s).replace(/-/g, '+').replace(/_/g, '/')
+    while (s.length % 4) s += '='            // padding is stripped when encoding
     var b = atob(s), u = new Uint8Array(b.length)
     for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i)
     return u
@@ -811,10 +812,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       .catch(() => 'b' + b64(bytes))
   }
   function unpack (s) {
-    var kind = String(s)[0], data = unb64(String(s).slice(1))
-    if (kind !== 'z') return Promise.resolve(JSON.parse(new TextDecoder().decode(data)))
-    return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')))
-      .text().then(t => JSON.parse(t))
+    try {
+      var kind = String(s)[0], data = unb64(String(s).slice(1))
+      if (kind !== 'z') return Promise.resolve(JSON.parse(new TextDecoder().decode(data)))
+      return new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')))
+        .text().then(t => JSON.parse(t))
+    } catch (e) { return Promise.reject(e) }
   }
   function shareLink (all) {
     var list = scope(all)
@@ -822,7 +825,9 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     return pack(list).then(function (blob) {
       var link = location.origin + location.pathname + location.search + '#tack=' + blob
       return write(link).then(function () {
-        toast(link.length > 2000 ? 'Link copied (long — some chat apps may cut it)' : 'Review link copied · ' + list.length + ' notes')
+        toast(link.length > 2000
+          ? 'Copied · ' + list.length + ' notes, ' + link.length + ' chars — long links get cut by some chat apps, ☰ Download .md is safer'
+          : 'Review link copied · ' + list.length + ' note' + (list.length !== 1 ? 's' : ''))
       }, function () { toast('Clipboard blocked') })
     })
   }

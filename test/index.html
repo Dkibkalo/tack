@@ -190,6 +190,18 @@
   ok('import restores edits', back[1].edit && back[1].edit.to === 'placeholder text', JSON.stringify(back[1].edit))
   ok('import restores selectors', back[0].selector === '#lead', back[0].selector)
   ok('bad payload does not throw', (await T.load('#tack=zNOTVALID')) === 0)
+  // A chat app that cuts the URL must produce a toast, not an uncaught error.
+  // atob throws synchronously, so every cut length has to stay on the async path.
+  var blob = link.slice(link.indexOf('#tack=') + 6)
+  var cutFail = 0, cutThrew = ''
+  for (var c = 1; c < blob.length; c++) {
+    try {
+      var got = await T.load('#tack=' + blob.slice(0, c))
+      if (got !== 0) cutFail++
+    } catch (e) { cutThrew = 'threw at ' + c + ': ' + e.name; break }
+  }
+  ok('no truncation throws synchronously', !cutThrew, cutThrew)
+  ok('no truncation imports garbage', cutFail === 0, String(cutFail))
 
   // 16. APPLIED CHECK — did the agent actually do it?
   reset(); T.on()

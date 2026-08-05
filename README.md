@@ -102,7 +102,7 @@ Selectors break on the first refactor; element text usually survives. Telling th
 - 📦 **11KB gzipped** — zero dependencies, vanilla JS
 - 🔒 **Local-only** — no data leaves your browser (localStorage)
 - 👻 **Dormant until needed** — activate with `#tack`
-- 🖐 **Never writes to your DOM** — annotations are drawn on an overlay, so `<img>`, inputs, SVG and tables are untouched, and your layout never shifts
+- 🖐 **Never mutates your elements** — the UI is one shadow-root container on `<body>`; marks are drawn over the page, so `<img>`, inputs, SVG and tables are untouched and your layout never shifts
 - ✏️ **Rewrite text and attributes** in place instead of describing the change
 - 🔗 **Share a review as a link** — no server, no account
 - ✅ **Verify what was applied** after the agent runs
@@ -112,7 +112,7 @@ Selectors break on the first refactor; element text usually survives. Telling th
 - ⏸ **Freeze animations** so you can annotate a specific frame
 - 🌗 **Light and dark** toolbar
 - 📄 **Multi-page** — per-page by default, all pages on demand
-- 🌐 **Works anywhere** — any page, any framework, bookmarklet for external sites
+- 🌐 **Any page, any framework** — bookmarklet for sites you don't control (a strict `script-src` CSP will block it)
 
 ## Keyboard
 
@@ -152,19 +152,28 @@ This is how an agent with browser control reviews a page it doesn't own: load th
 
 ## Keep in Production
 
-Until `#tack` is in the URL hash, Tack registers one idle keyboard listener and stops. No DOM changes, no network requests, no work on your page.
+Until `#tack` is in the URL hash, Tack registers one idle keyboard listener and stops: no toolbar, no elements added, no network requests, nothing read from the page.
 
-Once active it is honest about what it does: a fixed toolbar, intercepted clicks, and an overlay above your page. Closing it removes every trace.
+Once active it is honest about what it does: a floating toolbar, intercepted clicks and hovers, and an overlay above your page. Closing it removes every trace.
+
+## Privacy
+
+The library sends nothing anywhere — no telemetry, no version check, no error reporting. It makes no network requests at all; notes live in `localStorage` and a review link carries its payload in the URL fragment, which browsers never send to a server. A test drives the whole product with `fetch`, `XMLHttpRequest`, `sendBeacon`, `Image`, `WebSocket` and `EventSource` instrumented, and fails if any of them fires.
+
+The gettack.dev website uses aggregate visitor analytics — [details](https://gettack.dev/privacy).
 
 ## Claude Code
 
 `skills/tack/SKILL.md` covers both installing Tack in a project and applying a pasted review. Point your agent at it, or copy it into `.claude/skills/`.
+
+Full documentation lives at [gettack.dev/docs](https://gettack.dev/docs).
 
 ## Development
 
 ```bash
 npm install
 npm test          # headless Chrome smoke suite, source + built artifact
+npm run test:site # build the site, then check metadata, links, sitemap, robots
 npm run build:js  # tack.js → tack.min.js
 npm run dev       # landing page
 ```
@@ -180,13 +189,13 @@ npm run dev       # landing page
 | Build step | None | Required | Required | n/a |
 | Pages you don't own | ✓ (bookmarklet) | ✗ | ✗ localhost only | ✓ |
 | Ship to production | ✓ dormant | ✗ dev-only | ✗ | ✗ |
-| Size | 11KB gzip | 672KB ESM | Extension + server | Extension |
+| Size (gzip) | 11 KB | 115 KB | Extension + server | Extension |
 | License | MIT | PolyForm Shield | MIT | Custom |
 | Agent sync loop (MCP) | ✗ not yet | ✓ | ✓ | ✗ |
 | React source file + line | ✗ | ✓ | ✗ | ✗ |
 | Layout / wireframe mode | ✗ | ✓ | ✗ | ✗ |
 
-Competitor facts checked 2026-08-05 against their public packages and docs.
+Compared against `agentation@3.0.2` on 2026-08-05, from its published npm package and docs. Sizes are gzip of the shipped bundle (`gzip -c -9` on `tack.min.js` and on their `dist/index.mjs`). A ✗ means "not documented", not "impossible".
 
 ## License
 

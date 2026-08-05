@@ -27,10 +27,15 @@
     "test": "node test/run.mjs && TACK=min node test/run.mjs",
     "dev": "astro dev",
     "build": "npm run build:js && cp tack.min.js public/tack.js && astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test:site": "npm run build && node test/site.mjs"
   },
   "devDependencies": {
     "astro": "^5.0.0",
     "esbuild": "^0.27.7"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@vercel/analytics": "^2.0.1"
   }
 }

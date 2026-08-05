@@ -29,6 +29,19 @@
     }
   })
   window.__copied = null
+  // Tack claims it never makes a network request. Record any attempt.
+  window.__net = []
+  var _f = window.fetch
+  window.fetch = function () { window.__net.push('fetch'); return _f.apply(this, arguments) }
+  var _open = XMLHttpRequest.prototype.open
+  XMLHttpRequest.prototype.open = function () { window.__net.push('xhr'); return _open.apply(this, arguments) }
+  if (navigator.sendBeacon) navigator.sendBeacon = function () { window.__net.push('beacon'); return false }
+  var _Image = window.Image
+  window.Image = function () { window.__net.push('image'); return new _Image() }
+  var _WS = window.WebSocket
+  window.WebSocket = function () { window.__net.push('websocket'); return new _WS('ws://127.0.0.1:1') }
+  var _ES = window.EventSource
+  if (_ES) window.EventSource = function () { window.__net.push('eventsource'); return new _ES('/') }
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
     value: { writeText: t => { window.__copied = t; return Promise.resolve() } }
@@ -277,6 +290,21 @@
   ok('freeze injects a style', !!document.getElementById('tack-freeze'))
   T.prefs({ freeze: 0 })
   ok('freeze style goes away', !document.getElementById('tack-freeze'))
+
+  // 20. the library must stay offline through a full workflow
+  reset(); T.on()
+  T.add(document.getElementById('lead'), 'network guard')
+  T.add(document.getElementById('shot'), '', { a: 'alt', to: 'New alt' })
+  T.select(['#lead', '#inp']); T.add('#lead', 'grouped')
+  T.md(true)
+  var shareLink = await T.link(false)
+  await T.load(shareLink)
+  await T.copy(false)
+  T.applied()
+  T.menu(); T.open('#lead')
+  T.prefs({ freeze: 1 }); T.prefs({ freeze: 0 })
+  T.off()
+  ok('library made no network request', window.__net.length === 0, window.__net.join(', '))
 
   reset()
   results.push('---')

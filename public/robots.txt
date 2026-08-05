@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gettack.dev/sitemap-index.xml

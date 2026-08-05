@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro'
+---
+
+<Base
+  title="Privacy — Tack"
+  description="What the Tack library collects (nothing) and what the gettack.dev website collects (aggregate visitor analytics)."
+  path="/privacy"
+>
+  <style slot="head" is:global>
+    .doc { max-width:680px; margin:0 auto; padding:0 24px 100px; }
+    .doc h1 { font:800 clamp(30px,5vw,42px)/1.1 var(--display); color:var(--text-bright); letter-spacing:-.03em; margin:60px 0 20px; }
+    .doc h2 { font:700 20px var(--display); color:var(--text-bright); margin:40px 0 10px; }
+    .doc p { margin-bottom:14px; line-height:1.7; }
+    .doc ul { margin:0 0 14px 20px; } .doc li { margin-bottom:7px; line-height:1.65; }
+    .doc code { font:400 13px var(--mono); color:var(--amber); }
+    .doc a { color:var(--blue); }
+    .doc .back { display:inline-block; font:500 12px var(--mono); color:var(--text-dim); text-decoration:none; margin-top:40px; }
+  </style>
+
+  <main class="doc">
+    <a class="back" href="/">← gettack.dev</a>
+    <h1>Privacy</h1>
+    <p>Two different things live here, and they behave differently. The distinction matters, so it is spelled out rather than summarised.</p>
+
+    <h2>The Tack library</h2>
+    <p>The script you install on your own site sends nothing anywhere. It makes no network requests of any kind: no telemetry, no version check, no error reporting, no analytics. Your annotations are never transmitted.</p>
+    <p>Everything it stores is in your own browser:</p>
+    <ul>
+      <li><code>localStorage["tack_notes"]</code> — your notes for the current origin</li>
+      <li><code>localStorage["tack_last"]</code> — the last export, so it can be restored</li>
+      <li><code>localStorage["tack_prefs"]</code> — toolbar settings</li>
+    </ul>
+    <p>Clearing site data removes all of it. A review link carries its contents inside the URL fragment, which browsers do not send to servers — it travels only as far as you paste it.</p>
+    <p>Loading the script from unpkg.com is a request to that CDN, the same as any third-party script tag. Self-host the file if you would rather not make it.</p>
+    <p>The source is MIT licensed and about 900 readable lines; none of the above requires taking our word for it.</p>
+
+    <h2>This website</h2>
+    <p>gettack.dev uses Vercel Web Analytics to count visits, so we can tell whether anyone is finding the project. It records page views, referrer, country, device type, browser and operating system, and derives a daily visitor hash from the request. It does not use tracking cookies and does not build a cross-site profile of you.</p>
+    <p>Four interactions are counted as events, without any content attached: activating the demo, copying the install snippet, taking the bookmarklet, and following a link out to GitHub or npm.</p>
+    <p>Review links are never reported. If you open a <code>#tack=…</code> link on this site, the fragment stays in your browser and is stripped from anything analytics sees.</p>
+    <p>Fonts are served from this domain, so viewing this page does not contact Google or any other third party. The only external request is to unpkg if you install the script from there.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or corrections: <a href="https://github.com/Dkibkalo/tack/issues">open an issue</a>.</p>
+
+    <a class="back" href="/">← back to gettack.dev</a>
+  </main>
+</Base>

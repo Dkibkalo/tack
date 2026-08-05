@@ -1,0 +1,28 @@
+# Tack
+
+> An 11 KB MIT-licensed script that lets a person click elements on any web page,
+> leave notes or rewrite the text in place, and hand an AI coding agent an exact,
+> resolvable description of what to change. One script tag, no build step, no
+> framework requirement, no server, no account. Annotations stay in the browser.
+
+Tack is installed with a single `<script src="https://unpkg.com/@kibkalo/tack">` tag,
+or run through a bookmarklet on pages you do not control. It stays dormant until
+`#tack` is added to the URL. Exports are Markdown containing three anchors per note
+(element text, nearest heading, DOM selector) plus a stated protocol for resolving
+them, so the agent knows text beats selectors after a refactor.
+
+## Docs
+
+- [Documentation](https://gettack.dev/docs): install, activation, note lifecycle, text rewriting, multi-select, share links, applied check, keyboard, JavaScript API, export format, limits
+- [Privacy](https://gettack.dev/privacy): what the library and the website do and do not collect
+- [README](https://github.com/Dkibkalo/tack): quick start and feature summary
+
+## Source
+
+- [GitHub repository](https://github.com/Dkibkalo/tack): MIT licensed source, issues, tests
+- [npm package](https://www.npmjs.com/package/@kibkalo/tack): released versions
+- [Script](https://unpkg.com/@kibkalo/tack): the built file that gets served
+
+## Optional
+
+- [Claude Code skill](https://github.com/Dkibkalo/tack/blob/master/skills/tack/SKILL.md): installing Tack in a project and applying a pasted review

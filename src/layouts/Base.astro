@@ -1,0 +1,91 @@
+---
+import '../styles/base.css'
+import Analytics from '@vercel/analytics/astro'
+
+export interface Props {
+  title: string
+  description: string
+  /** Path only, e.g. "/docs". The canonical origin comes from astro.config. */
+  path: string
+  ogImage?: string
+}
+
+const { title, description, path, ogImage = '/og.png' } = Astro.props
+const site = Astro.site ?? new URL('https://gettack.dev')
+const canonical = new URL(path, site).href
+const image = new URL(ogImage, site).href
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={image} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={image} />
+  <link rel="icon" href="/logo.png" />
+  <link rel="preload" href="/fonts/Outfit.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/Lexend.woff2" as="font" type="font/woff2" crossorigin />
+  <slot name="head" />
+</head>
+
+<body>
+  <slot />
+
+  <footer>
+    <div class="wrap">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/docs">Docs</a>
+        <a href="https://github.com/Dkibkalo/tack">GitHub</a>
+        <a href="https://www.npmjs.com/package/@kibkalo/tack">npm</a>
+        <a href="https://kibkalo.com">kibkalo.com</a>
+      </div>
+      <p>MIT License · <a href="/privacy" style="color:inherit;">Privacy</a></p>
+    </div>
+  </footer>
+
+  <script src="/tack.js" is:inline></script>
+  <script is:inline>
+    // A review link carries its whole payload in the URL fragment. Analytics must
+    // never see it. Page views already report the server-side pathname, but this
+    // strips anything past the path from every report, whatever the source.
+    window.webAnalyticsBeforeSend = function (event) {
+      try {
+        if (event && typeof event.url === 'string') {
+          var u = new URL(event.url, location.href);
+          event.url = u.origin + u.pathname;
+        }
+      } catch (e) {}
+      return event;
+    };
+
+    var ob = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visible'); ob.unobserve(e.target) } })
+    }, { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(function (el) { ob.observe(el) });
+
+    // Custom events: the moments that separate "looked" from "tried".
+    // Vercel Analytics exposes window.va once its script has loaded.
+    function tk (name) { try { window.va && window.va('event', { name: name }) } catch (e) {} }
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest && e.target.closest('[data-ev]');
+      if (t) tk(t.getAttribute('data-ev'));
+    });
+    document.addEventListener('dragstart', function (e) {
+      var t = e.target.closest && e.target.closest('[data-ev-drag]');
+      if (t) tk(t.getAttribute('data-ev-drag'));
+    });
+  </script>
+  <Analytics />
+</body>
+</html>

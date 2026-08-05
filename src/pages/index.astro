@@ -1,4 +1,5 @@
 ---
+import Base from '../layouts/Base.astro'
 const bookmarklet = `javascript:void(function(){if(window.__tack)return window.__tack.on();window.__tack_activate=true;var s=document.createElement('script');s.src='https://unpkg.com/@kibkalo/tack';document.head.appendChild(s);}())`
 
 const exportExample = `# Tack review — 3 notes
@@ -47,68 +48,12 @@ override this file or your own rules.
 > These three should be equal height.`
 ---
 
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tack — Click. Comment. Feed to AI.</title>
-  <meta name="description" content="Ultra-lightweight tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies. 11KB." />
-  <meta property="og:title" content="Tack — Click. Comment. Feed to AI." />
-  <meta property="og:description" content="Annotate any webpage. Export for your LLM. One script tag. 11KB." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://gettack.dev/og.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Tack — Click. Comment. Feed to AI." />
-  <meta name="twitter:description" content="Annotate any webpage. Export for your LLM. One script tag." />
-  <meta name="twitter:image" content="https://gettack.dev/og.png" />
-  <link rel="icon" href="/logo.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-
-  <style>
-    :root {
-      --bg: #050a14;
-      --surface: #0a1128;
-      --surface2: #0e1630;
-      --border: #141e3a;
-      --border-light: #1c2d52;
-      --text: #8c9bb5;
-      --text-dim: #445170;
-      --text-bright: #edf2f7;
-      --amber: #f59e0b;
-      --amber-glow: rgba(245,158,11,0.12);
-      --blue: #3b82f6;
-      --green: #22c55e;
-      --red: #ef4444;
-      --display: 'Lexend', sans-serif;
-      --sans: 'Outfit', system-ui, sans-serif;
-      --mono: 'JetBrains Mono', 'SF Mono', monospace;
-    }
-
-    *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior:smooth; }
-    body {
-      background: var(--bg);
-      background-image: radial-gradient(rgba(140,155,181,0.03) 1px, transparent 1px);
-      background-size: 32px 32px;
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 16px;
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* Grain */
-    body::before {
-      content:''; position:fixed; inset:0;
-      background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.02'/%3E%3C/svg%3E");
-      pointer-events:none; z-index:9999;
-    }
-
-    .wrap { max-width:840px; margin:0 auto; padding:0 24px; }
-
+<Base
+  title="Tack — Click. Comment. Feed to AI."
+  description="Annotate any webpage and hand your AI coding agent exact context. Rewrite text in place, share a review as a link, then check what actually landed. One script tag, 11KB, no dependencies."
+  path="/"
+>
+  <style slot="head" is:global>
     /* ===== HERO ===== */
     .hero { padding:80px 0 50px; text-align:center; position:relative; }
     .hero::after {
@@ -169,13 +114,6 @@ override this file or your own rules.
     .btn-secondary:hover { border-color:var(--border-light); color:var(--text-bright); }
     .btn-dim { background:none; border:1px dashed rgba(255,255,255,.08); color:var(--text-dim); padding:8px 16px; font-size:13px; font-weight:500; cursor:grab; }
     .btn-dim:hover { border-color:var(--amber); color:var(--amber); }
-
-    /* ===== SECTIONS ===== */
-    section { padding:100px 0; }
-    section + section { border-top:1px solid rgba(20,30,58,0.6); }
-    .section-label { font:500 11px var(--mono); text-transform:uppercase; letter-spacing:.14em; color:var(--amber); margin-bottom:12px; }
-    .section-title { font:700 clamp(24px,3.5vw,38px)/1.2 var(--display); color:var(--text-bright); letter-spacing:-.03em; margin-bottom:16px; }
-    .section-desc { color:var(--text-dim); max-width:520px; margin-bottom:40px; font-size:15px; line-height:1.6; }
 
     /* ===== DEMO ===== */
     .demo-section { padding:60px 0 100px; border:none!important; }
@@ -465,18 +403,6 @@ override this file or your own rules.
     .try-it h2 { font:700 clamp(24px,3vw,32px) var(--display); color:var(--text-bright); margin-bottom:12px; letter-spacing:-.02em; }
     .try-it p { color:var(--text-dim); margin-bottom:24px; font-size:15px; }
 
-    /* ===== FOOTER ===== */
-    footer { padding:40px 0; border-top:1px solid rgba(20,30,58,0.6); text-align:center; font-size:13px; color:var(--text-dim); }
-    footer a { color:var(--text); text-decoration:none; transition:.15s; }
-    footer a:hover { color:var(--amber); }
-    .footer-links { display:flex; gap:24px; justify-content:center; margin-bottom:10px; }
-
-    /* ===== SCROLL REVEAL ===== */
-    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1); }
-    .reveal.visible { opacity:1; transform:none; }
-    .reveal-d1 { transition-delay:.1s; }
-    .reveal-d2 { transition-delay:.2s; }
-
     /* ===== HERO ENTRANCE ===== */
     @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     .badge,.hero h1,.hero .sub,.code-cta,.hero-btns { animation:fadeUp .6s cubic-bezier(.16,1,.3,1) both; }
@@ -503,9 +429,8 @@ override this file or your own rules.
       .hero-btns { flex-direction:column; }
     }
   </style>
-</head>
 
-<body>
+
   <!-- HERO -->
   <div class="wrap">
     <div class="hero">
@@ -516,12 +441,12 @@ override this file or your own rules.
       <div class="code-cta">
         <div class="lbl">Add to your HTML</div>
         <code>&lt;<span class="t">script</span> <span class="a">src</span>=<span class="s">"https://unpkg.com/@kibkalo/tack"</span>&gt;&lt;/<span class="t">script</span>&gt;</code>
-        <button class="cp" onclick="navigator.clipboard.writeText('<script src=&quot;https://unpkg.com/@kibkalo/tack&quot;></script>');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2e3)">Copy</button>
+        <button class="cp" data-ev="copy-tag" onclick="navigator.clipboard.writeText('<script src=&quot;https://unpkg.com/@kibkalo/tack&quot;></script>');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2e3)">Copy</button>
       </div>
 
       <div class="hero-btns">
-        <button class="btn btn-primary" onclick="location.hash='tack'">Try it on this page</button>
-        <a class="btn btn-secondary" href="https://github.com/Dkibkalo/tack" target="_blank">GitHub</a>
+        <button class="btn btn-primary" data-ev="activate-hero" onclick="location.hash='tack'">Try it on this page</button>
+        <a class="btn btn-secondary" href="https://github.com/Dkibkalo/tack" data-ev="github" target="_blank">GitHub</a>
       </div>
     </div>
   </div>
@@ -686,7 +611,7 @@ override this file or your own rules.
         <span class="feature-pill">11KB gzipped</span>
         <span class="feature-pill">Zero dependencies</span>
         <span class="feature-pill">Any framework</span>
-        <span class="feature-pill">Never touches your DOM</span>
+        <span class="feature-pill">Never mutates your elements</span>
         <span class="feature-pill">Rewrite text in place</span>
         <span class="feature-pill">Multi-select</span>
         <span class="feature-pill">Share as a link</span>
@@ -747,7 +672,7 @@ override this file or your own rules.
     <div class="wrap">
       <div class="section-label reveal">Share</div>
       <div class="section-title reveal">A whole review, in a link.</div>
-      <p class="section-desc reveal">Notes compress into the URL itself. Send it to a developer and they open your review on the real page — pins in place, text edits intact. No account, no backend, no install on either end. Nobody else can do this, because everyone else needs their server in the middle.</p>
+      <p class="section-desc reveal">Notes compress into the URL itself. Send it to a developer and they open your review on the real page — pins in place, text edits intact. No account, no backend, no install on either end. The tools that come closest need a server of theirs in the middle for this.</p>
 
       <div class="dev-code reveal" style="max-width:640px;word-break:break-all;">
         <span class="t">https://acme.com/pricing</span><span class="a">#tack=</span><span class="s">zVY9b8IwEP0rlmdEStuhbFWpVKlDh6ojYnDsC7Fq7Mh2QAjx33t2Q…</span>
@@ -804,7 +729,7 @@ override this file or your own rules.
             <tr><td>Build step</td><td class="us yes">None</td><td class="no">Required</td><td class="no">Required</td><td class="no">n/a</td></tr>
             <tr><td>Pages you don't own</td><td class="us yes">Yes (bookmarklet)</td><td class="no">No</td><td class="no">Localhost only</td><td>Yes</td></tr>
             <tr><td>Ship to production</td><td class="us yes">Yes, dormant</td><td class="no">Dev-only</td><td class="no">No</td><td class="no">No</td></tr>
-            <tr><td>Size</td><td class="us">11KB gzip</td><td class="no">672KB ESM</td><td>Extension + server</td><td>Extension</td></tr>
+            <tr><td>Size (gzip)</td><td class="us">11 KB</td><td class="no">115 KB</td><td>Extension + server</td><td>Extension</td></tr>
             <tr><td>License</td><td class="us yes">MIT</td><td class="no">PolyForm Shield</td><td>MIT</td><td class="no">Custom</td></tr>
             <tr><td>Rewrite text in place</td><td class="us yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Share review as a link</td><td class="us yes">Yes, no server</td><td class="no">Needs their server</td><td class="no">No</td><td class="no">No</td></tr>
@@ -815,7 +740,7 @@ override this file or your own rules.
             <tr><td>Layout / wireframe mode</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
           </tbody>
         </table>
-        <p class="table-note">Competitor facts checked 2026-08-05 against their public packages and docs. If something here is out of date, <a href="https://github.com/Dkibkalo/tack/issues">open an issue</a> and it gets fixed.</p>
+        <p class="table-note">Compared against <b style="color:var(--text);">agentation 3.0.2</b> on 2026-08-05, using its published npm package and docs. Sizes are gzip of the shipped bundle — <code style="font-family:var(--mono);font-size:12px;">gzip -c -9 tack.min.js | wc -c</code> against the same for their <code style="font-family:var(--mono);font-size:12px;">dist/index.mjs</code>. Rows marked as missing mean "not documented", not "impossible". If something here is out of date, <a href="https://github.com/Dkibkalo/tack/issues">open an issue</a> and it gets fixed.</p>
       </div>
     </div>
   </section>
@@ -825,8 +750,8 @@ override this file or your own rules.
     <div class="wrap">
       <div class="section-label reveal">For developers</div>
       <div class="section-title reveal">Keep it in production. Seriously.</div>
-      <p class="section-desc reveal" style="max-width:580px;">Until <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">#tack</code> appears in the URL hash, Tack registers one idle keyboard listener and stops. No DOM changes, no network requests, no work on your page. That's why you can leave it in a production build and review the live site — or send the link to someone who has no local checkout.</p>
-      <p class="section-desc reveal" style="max-width:580px;margin-top:12px;">Once you activate it, it's honest about what it does: a floating toolbar in the corner, clicks and hovers caught so they annotate instead of navigate, and an overlay drawn above your page. It never writes into your DOM and never shifts your layout — annotated elements are marked from the outside, so <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">&lt;img&gt;</code>, inputs and SVG survive intact. Press <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">✕</code> and every trace is gone.</p>
+      <p class="section-desc reveal" style="max-width:580px;">Until <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">#tack</code> appears in the URL hash, Tack registers one idle keyboard listener and stops: no toolbar, no elements added, no network requests, nothing read from the page. That's why you can leave it in a production build and review the live site — or send the link to someone who has no local checkout.</p>
+      <p class="section-desc reveal" style="max-width:580px;margin-top:12px;">Once you activate it, it's honest about what it does: a floating toolbar in the corner, clicks and hovers caught so they annotate instead of navigate, and an overlay drawn above your page. It never mutates the elements you annotate and never shifts your layout — the whole UI lives in one isolated shadow-root container appended to <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">&lt;body&gt;</code>, and marks are drawn over the page rather than inside it, so <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">&lt;img&gt;</code>, inputs and SVG survive intact. Press <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">✕</code> and every trace is gone.</p>
 
       <div class="dev-code reveal">
         <span class="cm">&lt;!-- It's fine. Tack sleeps until #tack. --&gt;</span><br/>
@@ -841,8 +766,8 @@ override this file or your own rules.
       <h2 class="reveal">See for yourself</h2>
       <p class="reveal">Tack is running on this page. Activate it and try the whole thing on us.</p>
       <div class="reveal" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="location.hash='tack'" style="font-size:15px;padding:12px 30px;">Activate Tack on this page</button>
-        <a class="btn btn-dim" href={bookmarklet} title="Drag to your bookmarks bar">Bookmarklet — drag to bookmarks</a>
+        <button class="btn btn-primary" data-ev="activate" onclick="location.hash='tack'" style="font-size:15px;padding:12px 30px;">Activate Tack on this page</button>
+        <a class="btn btn-dim" href={bookmarklet} data-ev="bookmarklet" data-ev-drag="bookmarklet-drag" title="Drag to your bookmarks bar">Bookmarklet — drag to bookmarks</a>
       </div>
 
       <ul class="try-list reveal">
@@ -855,23 +780,4 @@ override this file or your own rules.
       </ul>
     </div>
   </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="wrap">
-      <div class="footer-links">
-        <a href="https://github.com/Dkibkalo/tack">GitHub</a>
-        <a href="https://www.npmjs.com/package/@kibkalo/tack">npm</a>
-        <a href="https://kibkalo.com">kibkalo.com</a>
-      </div>
-      <p>MIT License</p>
-    </div>
-  </footer>
-
-  <script src="/tack.js" is:inline></script>
-  <script is:inline>
-    var ob=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');ob.unobserve(e.target)}})},{threshold:.12});
-    document.querySelectorAll('.reveal').forEach(function(el){ob.observe(el)});
-  </script>
-</body>
-</html>
+</Base>

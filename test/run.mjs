@@ -33,6 +33,18 @@ if (declared !== pkg.version) {
   process.exit(2)
 }
 
+// Cheap lint: the behavioural guard in the suite is the real proof, but this
+// catches an obvious outbound call before a browser is even launched.
+const NET = /\bfetch\s*\(|XMLHttpRequest|sendBeacon|new\s+Image\s*\(|new\s+WebSocket|EventSource|navigator\.connection/
+const offending = src.split('\n')
+  .map((l, i) => [i + 1, l])
+  .filter(([, l]) => NET.test(l) && !l.trim().startsWith('//'))
+if (offending.length) {
+  console.error('tack.js appears to make a network call:')
+  offending.forEach(([n, l]) => console.error(`  ${n}: ${l.trim()}`))
+  process.exit(2)
+}
+
 const chrome = process.env.CHROME || 'google-chrome'
 server.listen(0, '127.0.0.1', () => {
   const { port } = server.address()

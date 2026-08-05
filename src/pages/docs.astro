@@ -1,0 +1,201 @@
+---
+import Base from '../layouts/Base.astro'
+
+const install = [
+  ['Plain HTML', 'index.html', 'Before </body>'],
+  ['Next.js App Router', 'app/layout.tsx', 'Inside <body>, after {children}'],
+  ['Next.js Pages Router', 'pages/_document.tsx', 'Inside <body>, after <Main />'],
+  ['Astro', 'src/layouts/*.astro', 'Before </body>'],
+  ['Vite (any framework)', 'index.html', 'Before </body>'],
+  ['Nuxt', 'app.vue or nuxt.config.ts', 'app.head.script'],
+  ['SvelteKit', 'src/app.html', 'Before </body>'],
+  ['Rails', 'app/views/layouts/application.html.erb', 'Before </body>'],
+  ['Django / Jinja', 'templates/base.html', 'Before </body>'],
+  ['Laravel', 'resources/views/layouts/app.blade.php', 'Before </body>'],
+  ['WordPress', 'theme footer.php', 'Before wp_footer()'],
+]
+
+const api = [
+  ['__tack.on()', 'Activate without adding #tack to the URL.'],
+  ['__tack.off()', 'Deactivate and remove every trace from the page.'],
+  ['__tack.add(el, note)', 'Annotate an element or CSS selector. Returns the note.'],
+  ['__tack.add(el, "", {to})', 'Propose exact replacement text instead of a comment.'],
+  ['__tack.add(el, "", {a, to})', 'Same, for an attribute: {a: "alt", to: "New alt"}.'],
+  ['__tack.open(el, {edit})', 'Open the editor on an element for a human to fill in.'],
+  ['__tack.menu()', 'Open the actions menu.'],
+  ['__tack.select([a, b])', 'Stage a multi-element selection for the next note.'],
+  ['__tack.list()', 'All notes as plain objects.'],
+  ['__tack.md(all)', 'Markdown export. false = this page, true = every page.'],
+  ['__tack.copy(all)', 'Copy the export to the clipboard, then clear those notes.'],
+  ['__tack.link(all)', 'Promise of a shareable URL carrying the whole review.'],
+  ['__tack.load(url)', 'Import a review link. Resolves with the number of notes.'],
+  ['__tack.applied()', 'Compare the last export against the page: [{note, status}].'],
+  ['__tack.prefs(obj)', 'Read or set block, markers, freeze, light, open.'],
+  ['__tack.clear()', 'Delete every note.'],
+]
+
+const keys = [
+  ['⌘⇧F / Ctrl⇧F', 'Toggle Tack on and off'],
+  ['⌘↵ / Ctrl↵', 'Save the note you are typing'],
+  ['↑ / ↓', 'Move the target to the parent or first child element'],
+  ['Enter', 'Annotate the element you moved to'],
+  ['Esc', 'Close the popup, or drop the current selection'],
+]
+---
+
+<Base
+  title="Tack docs — annotate any page for your AI coding agent"
+  description="How to install Tack, annotate elements, rewrite text in place, share a review as a link, verify what your agent applied, and drive it all from JavaScript."
+  path="/docs"
+>
+  <style slot="head" is:global>
+    .doc { max-width:760px; margin:0 auto; padding:0 24px 100px; }
+    .doc h1 { font:800 clamp(34px,5vw,48px)/1.1 var(--display); color:var(--text-bright); letter-spacing:-.03em; margin:60px 0 14px; }
+    .doc .lede { font:400 18px/1.6 var(--sans); color:var(--text-dim); margin-bottom:40px; max-width:600px; }
+    .doc h2 { font:700 24px var(--display); color:var(--text-bright); letter-spacing:-.02em; margin:52px 0 12px; scroll-margin-top:20px; }
+    .doc h3 { font:600 16px var(--display); color:var(--text-bright); margin:28px 0 8px; }
+    .doc p { margin-bottom:14px; line-height:1.7; }
+    .doc ul { margin:0 0 14px 20px; } .doc li { margin-bottom:7px; line-height:1.65; }
+    .doc code { font:400 13px var(--mono); color:var(--amber); }
+    .doc pre { background:var(--surface); border:1px solid var(--border); border-radius:10px;
+      padding:16px 18px; overflow-x:auto; margin:0 0 18px; }
+    .doc pre code { color:var(--text-bright); font-size:12.5px; line-height:1.65; }
+    .doc a { color:var(--blue); }
+    .doc table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px; display:block; overflow-x:auto; }
+    .doc th,.doc td { padding:9px 12px; text-align:left; border-bottom:1px solid rgba(20,30,58,.6); vertical-align:top; }
+    .doc th { font:600 10px var(--mono); color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; }
+    .doc td:first-child { color:var(--text-bright); white-space:nowrap; }
+    .doc td code { white-space:nowrap; }
+    .toc { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+    .toc a { font:500 12px var(--mono); color:var(--text-dim); border:1px solid var(--border);
+      border-radius:999px; padding:5px 12px; text-decoration:none; }
+    .toc a:hover { border-color:var(--amber); color:var(--amber); }
+    .note { border-left:2px solid var(--amber); padding:2px 0 2px 16px; margin:0 0 18px; color:var(--text-dim); }
+    .doc .back { display:inline-block; font:500 12px var(--mono); color:var(--text-dim); text-decoration:none; margin-top:40px; }
+  </style>
+
+  <main class="doc">
+    <a class="back" href="/">← gettack.dev</a>
+    <h1>Documentation</h1>
+    <p class="lede">Tack is a script you add to a page so a human can point at things and an AI agent can find them again. Everything below is the whole product; there is nothing else to configure.</p>
+
+    <div class="toc">
+      <a href="#install">Install</a>
+      <a href="#activate">Activate</a>
+      <a href="#notes">Notes</a>
+      <a href="#rewrite">Rewrite text</a>
+      <a href="#multi">Multi-select</a>
+      <a href="#share">Share a review</a>
+      <a href="#verify">Verify</a>
+      <a href="#export">Export format</a>
+      <a href="#keyboard">Keyboard</a>
+      <a href="#api">JavaScript API</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#limits">Limits</a>
+    </div>
+
+    <h2 id="install">Install</h2>
+    <p>One tag, before the closing <code>&lt;/body&gt;</code>. No build step, no npm dependency, no framework requirement.</p>
+    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack"&gt;&lt;/script&gt;</code></pre>
+    <p>For anything you ship to real users, pin the version so a future release cannot change behaviour under you:</p>
+    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack@0.3.4"&gt;&lt;/script&gt;</code></pre>
+    <p>Serious deployments should self-host the file instead of loading it from a CDN. It is one file with no dependencies — copy <code>tack.min.js</code> into your own assets.</p>
+
+    <h3>Where the tag goes</h3>
+    <table>
+      <thead><tr><th>Stack</th><th>File</th><th>Position</th></tr></thead>
+      <tbody>
+        {install.map(([stack, file, pos]) => (
+          <tr><td>{stack}</td><td><code>{file}</code></td><td>{pos}</td></tr>
+        ))}
+      </tbody>
+    </table>
+
+    <h3>Pages you do not control</h3>
+    <p>Use the bookmarklet from the <a href="/">home page</a>: drag it to your bookmarks bar and click it on any page. It injects the same script. Sites with a strict <code>script-src</code> Content-Security-Policy will block it — that is a browser decision Tack cannot work around.</p>
+
+    <h2 id="activate">Activate</h2>
+    <p>Add <code>#tack</code> to the URL, or press <code>⌘⇧F</code>. No reload needed. The toolbar appears in the bottom-right corner.</p>
+    <p>Until then the script registers one idle keyboard listener and stops: no toolbar, no elements added, no network requests, nothing read from the page. That is why it is safe to leave in a production build.</p>
+
+    <h2 id="notes">Notes</h2>
+    <p>Click any element to annotate it. Numbered markers on the page match the numbering in the export.</p>
+    <p><b style="color:var(--text-bright)">Copy exports this page's notes and clears them.</b> You handed them to the agent; they should not come back in the next export. Undo sits in the toast, and <code>☰ → Restore last export</code> brings the whole batch back.</p>
+    <p>Notes accumulate per page as you navigate, including across SPA navigation. <code>☰ → Copy all pages</code> bundles everything into one file grouped by URL. <code>Download .md</code> never clears anything.</p>
+    <p>While Tack is active it catches clicks and hovers so the page underneath does not open dropdowns or follow links. Turn that off in <code>☰ → Settings</code> when you want to select text instead.</p>
+
+    <h2 id="rewrite">Rewrite text in place</h2>
+    <p>Click a text element, open the <code>✎ Edit text</code> tab, and its current text is already in the box. Change it and the export carries an exact replacement instead of a description:</p>
+    <pre><code>**Current:** `Building the future, one widget at a time.`
+**Change to:** `Ship your first widget in five minutes.`</code></pre>
+    <p>The same works for <code>alt</code>, <code>placeholder</code>, <code>title</code>, <code>aria-label</code>, <code>href</code> and <code>value</code>; pick the target in the dropdown when an element has several.</p>
+    <p class="note">The export tells the agent to apply these verbatim, and to stop and report instead of overwriting if the current value no longer matches what you saw. That check matters when a review sits for a day before anyone acts on it.</p>
+
+    <h2 id="multi">Multi-select</h2>
+    <p>Shift-click several elements, or drag a box around them, then write one note for the group. The export lists every selector the note applies to under <code>**Also applies to:**</code>.</p>
+
+    <h2 id="share">Share a review as a link</h2>
+    <p><code>☰ → Copy review link</code> compresses the whole review into the URL fragment:</p>
+    <pre><code>https://acme.com/pricing#tack=zVY9b8IwEP0rlmdESttD…</code></pre>
+    <p>Open it anywhere and the notes reappear on the real page. Nothing is uploaded — the review travels inside the link, so the person receiving it needs no account, no backend and no install.</p>
+    <p>Measured capacity, with notes that all differ: 10 notes fit in about 700 characters, 25 in about 1,000, 50 in about 1,500, 100 in about 2,500. Past roughly 2,000 characters some chat apps truncate long URLs; Tack warns you and suggests <code>Download .md</code> instead. A truncated link imports nothing and says so rather than importing half a review.</p>
+
+    <h2 id="verify">Verify what was applied</h2>
+    <p>Tack records what each annotated element looked like when you flagged it. After your agent has finished, reload and choose <code>☰ → Check what was applied</code>: changed elements go green, unchanged stay amber, missing ones are called out. Text rewrites are matched exactly against what you typed.</p>
+    <p>It compares the last export, so run it after <code>Copy</code>, not before.</p>
+
+    <h2 id="export">Export format</h2>
+    <p>The export is Markdown that explains to the model how to read itself. Each note carries three anchors, and the file states which to trust:</p>
+    <pre><code>## How to use this file
+Anchors per note, most reliable first:
+1. **Text** — element text at review time. Grep this first.
+2. **Section** — nearest preceding heading. Disambiguates repeated text.
+3. **Selector** — DOM path at review time; exact but stale after a refactor.
+
+Resolve by Text, confirm with Section, fall back to Selector. If nothing
+matches, the markup changed: act on the note's intent, do not guess a nearby
+element. Edit where the markup is authored (component, template, partial),
+not in built output.</code></pre>
+    <p>Selectors break on the first refactor; element text usually survives. Saying so up front is worth more than another field of metadata.</p>
+    <p>Note bodies are quoted and framed as human-typed data, so a note that happens to read like an instruction is not mistaken for one.</p>
+    <p><code> &gt;&gt;&gt; </code> in a selector marks an open shadow-DOM boundary.</p>
+
+    <h2 id="keyboard">Keyboard</h2>
+    <table>
+      <tbody>
+        {keys.map(([k, what]) => (<tr><td><code>{k}</code></td><td>{what}</td></tr>))}
+      </tbody>
+    </table>
+    <p>There are deliberately no single-letter shortcuts. Tack runs on top of your application, and your application's shortcuts should win.</p>
+
+    <h2 id="api">JavaScript API</h2>
+    <p><code>window.__tack</code> exists as soon as the script has loaded. This is how an agent with browser control reviews a page it does not own: load the URL, inject <code>tack.js</code>, annotate, then read <code>md()</code> or hand back <code>link()</code>.</p>
+    <table>
+      <tbody>
+        {api.map(([sig, what]) => (<tr><td><code>{sig}</code></td><td>{what}</td></tr>))}
+      </tbody>
+    </table>
+    <pre><code>__tack.on()
+__tack.add('#hero h1', 'Too vague — name the actual benefit')
+__tack.add('#sub', '', &#123; to: 'Ship your first widget in five minutes.' &#125;)
+const review = __tack.md(false)
+__tack.off()</code></pre>
+
+    <h2 id="privacy">Privacy</h2>
+    <p>The library sends no telemetry and never transmits your annotations. It makes no network requests of any kind — notes live in <code>localStorage</code> under <code>tack_notes</code>, and preferences under <code>tack_prefs</code>. A review link carries its contents inside the URL fragment, which browsers do not send to servers.</p>
+    <p>Loading the script from unpkg is itself a request to that CDN, as any script tag would be; self-host the file if that matters to you.</p>
+    <p>This website, gettack.dev, uses aggregate visitor analytics. See <a href="/privacy">the privacy page</a>.</p>
+
+    <h2 id="limits">Limits</h2>
+    <ul>
+      <li>Closed shadow roots cannot be reached by anything outside them, Tack included. Open shadow roots work, and selectors cross them.</li>
+      <li>A strict <code>script-src</code> CSP blocks the bookmarklet.</li>
+      <li>Built for desktop browsers. It is not adapted for touch.</li>
+      <li>Selectors are captured at review time and go stale when markup is restructured — which is exactly why the export ranks text above selectors.</li>
+      <li>Notes are stored per browser and per origin. They do not sync between machines; use a review link for that.</li>
+      <li>There is no agent sync loop yet: you copy the export into your agent, rather than the agent picking notes up on its own.</li>
+    </ul>
+
+    <a class="back" href="/">← back to gettack.dev</a>
+  </main>
+</Base>

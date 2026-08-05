@@ -228,13 +228,12 @@
   ok('collapsed button is not top-left', atTopLeft() !== host, String(atTopLeft() && atTopLeft().tagName))
   T.prefs({ open: 1, block: 1 })
 
-  // 17c. every export says what produced it, once, at the very end
+  // 17c. the export carries no branding — it is a work file, not a leaflet
   reset(); T.on()
-  T.add(document.getElementById('lead'), 'attribution check')
+  T.add(document.getElementById('lead'), 'export stays clean')
   var mdA = T.md(false)
-  ok('export is attributed', /Collected with Tack v\d+\.\d+\.\d+ — https:\/\/gettack\.dev/.test(mdA))
-  ok('attribution is last', mdA.trim().endsWith('gettack.dev'), mdA.trim().slice(-40))
-  ok('attribution appears once', (mdA.match(/gettack\.dev/g) || []).length === 1)
+  ok('export has no promo line', mdA.indexOf('gettack.dev') === -1, mdA.trim().slice(-60))
+  ok('export ends on the last note', mdA.trim().endsWith('export stays clean'), mdA.trim().slice(-40))
 
   // 17d. the "what is this" hint marks itself seen, so it never fires twice
   reset(); T.prefs({ seen: 0 })

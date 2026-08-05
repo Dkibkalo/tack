@@ -8,7 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
-  var VER = '0.3.2', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
+  var VER = '0.3.3', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -293,11 +293,6 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     })
     var hint = el('div', 'hh', prefs.block ? 'Turn off blocking to select text' : 'Select text to annotate a phrase')
     m.appendChild(hint)
-    m.appendChild(el('div', 'sep'))
-    var a = D.createElement('a')
-    a.className = 'ftr'; a.href = SITE; a.target = '_blank'; a.rel = 'noopener noreferrer'
-    a.textContent = 'Tack v' + VER + ' — add it to your own site ↗'
-    m.appendChild(a)
     shadow.appendChild(m)
   }
 
@@ -733,7 +728,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         m += '\n'
       })
     })
-    return m + '---\n\nCollected with Tack v' + VER + ' — ' + SITE + '\n'
+    return m
   }
   function write (t) {
     if (navigator.clipboard && W.isSecureContext) return navigator.clipboard.writeText(t)

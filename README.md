@@ -95,8 +95,6 @@ the markup changed: act on the note's intent, do not guess a nearby element…
 > Too aggressive. Use "Start free trial" and make it green.
 ```
 
-Every export ends with one attribution line (`Collected with Tack v0.3.2 — https://gettack.dev`) so whoever receives the file knows what produced it.
-
 Selectors break on the first refactor; element text usually survives. Telling the model that up front is worth more than another field of metadata.
 
 ## Features

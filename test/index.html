@@ -215,6 +215,19 @@
   ok('prefs survive restart', T.prefs().light === 1)
   T.prefs({ light: 0, block: 1 })
 
+  // 17b. the toolbar stays in the bottom-right corner, expanded or collapsed
+  reset(); T.on()
+  T.prefs({ block: 0, open: 1 })          // block:0 so hit-testing passes through elsewhere
+  var host = document.getElementById('tack-host')
+  var atCorner = () => document.elementFromPoint(innerWidth - 37, innerHeight - 37)
+  var atTopLeft = () => document.elementFromPoint(60, 60)
+  ok('expanded toolbar sits bottom-right', atCorner() === host, String(atCorner() && atCorner().id))
+  ok('expanded toolbar is not top-left', atTopLeft() !== host, String(atTopLeft() && atTopLeft().tagName))
+  T.prefs({ open: 0 })
+  ok('collapsed button stays bottom-right', atCorner() === host, String(atCorner() && atCorner().id))
+  ok('collapsed button is not top-left', atTopLeft() !== host, String(atTopLeft() && atTopLeft().tagName))
+  T.prefs({ open: 1, block: 1 })
+
   // 18. off() leaves nothing behind
   reset()
   var pushBefore = history.pushState

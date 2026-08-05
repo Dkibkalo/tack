@@ -13,7 +13,7 @@ background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:99
 .pill .go{background:#2563eb;color:#fff;padding:5px 12px} .pill .go:hover{background:#1d4ed8;color:#fff}
 .pill .tog{font-size:15px;padding:4px 8px}
 .mini{pointer-events:auto;position:fixed;right:16px;bottom:16px;width:42px;height:42px;border-radius:999px;
-background:var(--bg);border:1px solid var(--bd);box-shadow:var(--sh);font-size:17px;color:var(--fg);position:relative}
+background:var(--bg);border:1px solid var(--bd);box-shadow:var(--sh);font-size:17px;color:var(--fg)}
 .mini .bd{position:absolute;top:-4px;right:-4px;background:var(--ac);color:#111;border-radius:999px;font:600 10px system-ui;padding:1px 5px}
 .pop{pointer-events:auto;position:fixed;width:320px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);
 border-radius:10px;box-shadow:var(--sh);overflow:hidden}

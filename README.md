@@ -95,6 +95,8 @@ the markup changed: act on the note's intent, do not guess a nearby element…
 > Too aggressive. Use "Start free trial" and make it green.
 ```
 
+Every export ends with one attribution line (`Collected with Tack v0.3.2 — https://gettack.dev`) so whoever receives the file knows what produced it.
+
 Selectors break on the first refactor; element text usually survives. Telling the model that up front is worth more than another field of metadata.
 
 ## Features
@@ -135,6 +137,7 @@ __tack.on()                          // activate without the #tack hash
 __tack.add('#hero h1', 'note')       // annotate by selector or element
 __tack.add('#sub', '', {to: 'New copy'})       // propose exact replacement text
 __tack.add('#img', '', {a: 'alt', to: 'Alt'})  // …or an attribute value
+__tack.menu()                        // open the actions menu
 __tack.open('#hero h1', {edit: 1})   // open the editor on an element
 __tack.select(['#a', '#b'])          // stage a multi-element selection
 __tack.list()                        // all notes as plain objects

@@ -8,6 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
+  var VER = '0.3.2', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -122,7 +123,8 @@ button{font:inherit;cursor:pointer;border:0}
 .cat{position:fixed;inset:0;pointer-events:auto;cursor:crosshair}
 .pill{pointer-events:auto;position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:6px;
 background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:999px;padding:6px 8px;box-shadow:var(--sh);font-size:13px}
-.pill b{color:var(--ac);padding-left:6px} .pill .ct{color:var(--mut);font-size:12px;padding-right:2px}
+.pill .lg{color:var(--ac);padding-left:6px;text-decoration:none;cursor:pointer;line-height:1}
+.pill .lg:hover{filter:brightness(1.25)} .pill .ct{color:var(--mut);font-size:12px;padding-right:2px}
 .pill button{background:transparent;color:var(--mut);padding:5px 9px;border-radius:999px;font-size:12px}
 .pill button:hover{background:rgba(127,127,127,.18);color:var(--fg)}
 .pill .go{background:#2563eb;color:#fff;padding:5px 12px} .pill .go:hover{background:#1d4ed8;color:#fff}
@@ -156,6 +158,8 @@ border-radius:10px;padding:4px;box-shadow:var(--sh);min-width:210px;max-height:6
 .menu .hh{font:600 10px system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:6px 10px 3px}
 .menu label{display:flex;align-items:center;gap:8px;padding:6px 10px;font:13px system-ui;color:var(--fg);cursor:pointer}
 .menu label:hover{background:rgba(127,127,127,.15);border-radius:6px}
+.ftr{display:block;padding:6px 10px 5px;color:var(--mut);font:11px system-ui;text-decoration:none}
+.ftr:hover{color:var(--fg)}
 .item{display:flex;gap:8px;padding:6px 10px;border-radius:6px;font:12px system-ui;color:var(--fg);cursor:pointer;align-items:flex-start}
 .item:hover{background:rgba(127,127,127,.15)} .item i{color:var(--ac);font-style:normal;font-weight:600;min-width:14px}
 .item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .item u{color:var(--mut);text-decoration:none}
@@ -203,13 +207,17 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     catcher.style.pointerEvents = prefs.block ? 'auto' : 'none'
     var h = here().length
     if (!prefs.open) {
-      var m = el('button', 'mini', '📌')
+      var m = el('button', 'mini', '📌'); m.title = 'Tack — ' + SITE
       if (h) m.appendChild(el('span', 'bd', String(h)))
       m.onclick = () => { prefs.open = 1; savePrefs(); updBar() }
       shadow.appendChild(m); return
     }
     var p = el('div', 'pill')
-    p.appendChild(el('b', null, '📌'))
+    var lg = D.createElement('a')
+    lg.className = 'lg'; lg.textContent = '📌'
+    lg.href = SITE; lg.target = '_blank'; lg.rel = 'noopener noreferrer'
+    lg.title = 'Tack v' + VER + ' — add it to your own site'
+    p.appendChild(lg)
     var pg = pages()
     p.appendChild(el('span', 'ct', pg > 1 ? h + ' here · ' + notes.length + ' total' : h + ' note' + (h !== 1 ? 's' : '')))
     var go = el('button', 'go', h ? 'Copy (' + h + ')' : 'Copy'); go.onclick = () => doCopy(false)
@@ -226,6 +234,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     if (shadow.querySelector('.menu')) return gone('.menu')
     closePop()
     var m = el('div', 'menu')
+    var a = D.createElement('a')
+    a.className = 'ftr'; a.href = SITE; a.target = '_blank'; a.rel = 'noopener noreferrer'
+    a.textContent = 'Tack v' + VER + ' · gettack.dev ↗'
+    a.title = 'How to add Tack to your own site'
+    m.appendChild(a)
+    m.appendChild(el('div', 'sep'))
     var mine = here(), other = notes.length - mine.length, last = 0
     try { last = (JSON.parse(localStorage.getItem('tack_last')) || []).length } catch (e) {}
     if (mine.length) {
@@ -279,6 +293,11 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     })
     var hint = el('div', 'hh', prefs.block ? 'Turn off blocking to select text' : 'Select text to annotate a phrase')
     m.appendChild(hint)
+    m.appendChild(el('div', 'sep'))
+    var a = D.createElement('a')
+    a.className = 'ftr'; a.href = SITE; a.target = '_blank'; a.rel = 'noopener noreferrer'
+    a.textContent = 'Tack v' + VER + ' — add it to your own site ↗'
+    m.appendChild(a)
     shadow.appendChild(m)
   }
 
@@ -409,7 +428,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     })
   }
 
-  function toast (msg, undo) {
+  function toast (msg, undo, link) {
     if (!shadow) return
     gone('.tst')
     var t = el('div', 'tst', msg)
@@ -418,7 +437,19 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       a.onclick = () => { undo(); t.remove() }
       t.appendChild(a)
     }
-    shadow.appendChild(t); setTimeout(() => { if (t.parentNode) t.remove() }, 6000)
+    if (link) {
+      var b = D.createElement('a')
+      b.href = SITE; b.target = '_blank'; b.rel = 'noopener noreferrer'; b.textContent = link
+      t.appendChild(b)
+    }
+    shadow.appendChild(t); setTimeout(() => { if (t.parentNode) t.remove() }, link ? 10000 : 6000)
+  }
+  // Shown once per browser, so a first-time reviewer knows what this is.
+  function firstRun (msg) {
+    if (prefs.seen) return false
+    prefs.seen = 1; savePrefs()
+    toast(msg, null, 'What is Tack?')
+    return true
   }
 
   // --- Markers (overlay only, page DOM untouched) ---
@@ -702,7 +733,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         m += '\n'
       })
     })
-    return m
+    return m + '---\n\nCollected with Tack v' + VER + ' — ' + SITE + '\n'
   }
   function write (t) {
     if (navigator.clipboard && W.isSecureContext) return navigator.clipboard.writeText(t)
@@ -811,7 +842,8 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         }
       })
       notes = notes.concat(add); save(); render()
-      toast('Imported ' + add.length + ' note' + (add.length !== 1 ? 's' : ''))
+      var msg = 'Imported ' + add.length + ' note' + (add.length !== 1 ? 's' : '')
+      if (!firstRun(msg)) toast(msg)
       return add.length
     }, function () { toast('Could not read that review link'); return 0 })
   }
@@ -862,6 +894,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     W.addEventListener('popstate', nav)
     W.addEventListener('storage', onStore)
     hookNav(true); render()
+    setTimeout(function () { firstRun('Click anything to leave a note.') }, 600)
   }
   function off () {
     if (!active) return; active = false
@@ -928,6 +961,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       newNote(t, t.getBoundingClientRect(), '', picked.filter(x => x !== t), opt && opt.edit)
       return true
     },
+    menu: function () { if (!active) on(); menu(); return !!shadow.querySelector('.menu') },
     clear: function () { notes = []; save(); if (active) render() },
     prefs: function (o) { if (o) { Object.assign(prefs, o); savePrefs(); if (active) { host.classList.toggle('lt', !!prefs.light); freeze(!!prefs.freeze); updBar(); render() } } return Object.assign({}, prefs) }
   }

@@ -114,6 +114,7 @@ __tack.on()                          // activate without the #tack hash
 __tack.add('#hero h1', 'note')       // annotate by selector or element
 __tack.add('#sub', '', {to: 'New copy'})       // propose exact replacement text
 __tack.add('#img', '', {a: 'alt', to: 'Alt'})  // …or an attribute value
+__tack.menu()                        // open the actions menu
 __tack.open('#hero h1', {edit: 1})   // open the editor for a human to confirm
 __tack.select(['#a', '#b'])          // stage a multi-element selection
 __tack.list()                        // all notes, as plain objects

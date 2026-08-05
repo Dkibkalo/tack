@@ -23,6 +23,16 @@ const server = createServer(async (req, res) => {
   }
 })
 
+// The version shown in the toolbar and stamped on every export lives in tack.js;
+// drifting from package.json would mislabel published builds.
+const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'))
+const src = await readFile(join(root, 'tack.js'), 'utf8')
+const declared = (src.match(/var VER = '([^']+)'/) || [])[1]
+if (declared !== pkg.version) {
+  console.error(`VER mismatch: tack.js says ${declared}, package.json says ${pkg.version}`)
+  process.exit(2)
+}
+
 const chrome = process.env.CHROME || 'google-chrome'
 server.listen(0, '127.0.0.1', () => {
   const { port } = server.address()

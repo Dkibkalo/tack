@@ -228,6 +228,24 @@
   ok('collapsed button is not top-left', atTopLeft() !== host, String(atTopLeft() && atTopLeft().tagName))
   T.prefs({ open: 1, block: 1 })
 
+  // 17c. every export says what produced it, once, at the very end
+  reset(); T.on()
+  T.add(document.getElementById('lead'), 'attribution check')
+  var mdA = T.md(false)
+  ok('export is attributed', /Collected with Tack v\d+\.\d+\.\d+ — https:\/\/gettack\.dev/.test(mdA))
+  ok('attribution is last', mdA.trim().endsWith('gettack.dev'), mdA.trim().slice(-40))
+  ok('attribution appears once', (mdA.match(/gettack\.dev/g) || []).length === 1)
+
+  // 17d. the "what is this" hint marks itself seen, so it never fires twice
+  reset(); T.prefs({ seen: 0 })
+  T.on()
+  await new Promise(r => setTimeout(r, 800))
+  ok('hint marks itself seen', T.prefs().seen === 1)
+  ok('seen flag is persisted', (JSON.parse(localStorage.getItem('tack_prefs')) || {}).seen === 1)
+  T.off(); T.on()
+  await new Promise(r => setTimeout(r, 800))
+  ok('seen survives a restart', T.prefs().seen === 1)
+
   // 18. off() leaves nothing behind
   reset()
   var pushBefore = history.pushState

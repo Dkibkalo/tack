@@ -15,4 +15,11 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm test
+      - name: Verify tack.min.js is up to date
+        run: |
+          npm run build:js
+          git diff --exit-code tack.min.js \
+            || { echo "tack.min.js is stale — run 'npm run build:js' and commit it"; exit 1; }
       - run: npm publish --provenance --access public

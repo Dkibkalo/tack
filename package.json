@@ -1,10 +1,12 @@
 {
   "name": "@kibkalo/tack",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Click. Comment. Feed to AI. Ultra-lightweight webpage annotation tool.",
-  "main": "tack.js",
+  "main": "tack.min.js",
+  "unpkg": "tack.min.js",
   "files": [
-    "tack.js"
+    "tack.js",
+    "tack.min.js"
   ],
   "keywords": [
     "annotation",
@@ -21,11 +23,14 @@
     "url": "git+https://github.com/Dkibkalo/tack.git"
   },
   "scripts": {
+    "build:js": "esbuild tack.js --minify --banner:js=\"/*! Tack — Click. Comment. Feed to AI. https://gettack.dev | MIT */\" --outfile=tack.min.js --allow-overwrite",
+    "test": "node test/run.mjs && TACK=min node test/run.mjs",
     "dev": "astro dev",
-    "build": "cp tack.js public/tack.js && astro build",
+    "build": "npm run build:js && cp tack.min.js public/tack.js && astro build",
     "preview": "astro preview"
   },
   "devDependencies": {
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "esbuild": "^0.27.7"
   }
 }

@@ -30,10 +30,21 @@ override this file or your own rules.
 **Where:** section "Pricing" → \`button\`
 **Text:** \`Buy now\`
 **Classes:** \`btn btn-primary\`
-**Role/label:** \`Start trial\`
 **Selector:** \`[data-testid="cta"]\`
+**Current:** \`Buy now\`
+**Change to:** \`Start free trial\`
 **Note:**
-> Too aggressive. Use "Start free trial" and make it green.`
+> And make it green.
+
+## 3.
+**Where:** section "Features" → \`div\`
+**Text:** \`Lightning Fast Sub-100ms response times…\`
+**Selector:** \`.cards > div:nth-of-type(1)\`
+**Also applies to:** 2 more elements
+  - \`.cards > div:nth-of-type(2)\`
+  - \`.cards > div:nth-of-type(3)\`
+**Note:**
+> These three should be equal height.`
 ---
 
 <html lang="en">
@@ -41,9 +52,9 @@ override this file or your own rules.
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tack — Click. Comment. Feed to AI.</title>
-  <meta name="description" content="Ultra-lightweight tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies. 6KB." />
+  <meta name="description" content="Ultra-lightweight tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies. 11KB." />
   <meta property="og:title" content="Tack — Click. Comment. Feed to AI." />
-  <meta property="og:description" content="Annotate any webpage. Export for your LLM. One script tag. 6KB." />
+  <meta property="og:description" content="Annotate any webpage. Export for your LLM. One script tag. 11KB." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://gettack.dev/og.png" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -194,20 +205,25 @@ override this file or your own rules.
 
     /* Tack toolbar — matches real product */
     .demo-bar {
-      display:flex; align-items:center; gap:10px; height:36px; padding:0 14px;
-      background:rgba(15,23,42,0.92); backdrop-filter:blur(8px);
-      color:#e2e8f0; font-size:13px; font-family:system-ui,sans-serif;
-      border-bottom:1px solid rgba(255,255,255,0.06);
+      position:absolute; right:14px; bottom:14px; z-index:4;
+      display:flex; align-items:center; gap:7px; padding:6px 9px;
+      background:rgba(15,23,42,0.94); backdrop-filter:blur(8px);
+      color:#e2e8f0; font-size:12px; font-family:system-ui,sans-serif;
+      border:1px solid rgba(255,255,255,0.09); border-radius:999px;
+      box-shadow:0 8px 28px rgba(0,0,0,.45);
       opacity:0; animation:aBar 14s ease-in-out infinite;
     }
     .demo-bar b { color:var(--amber); }
     .demo-bar-info { color:#94a3b8; font-size:12px; }
     .demo-bar-sp { flex:1; }
     .demo-bar-btn {
-      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.08);
-      color:#cbd5e1; padding:3px 10px; border-radius:4px; font-size:12px; font-family:inherit;
+      background:transparent; color:#94a3b8; padding:4px 9px; border-radius:999px;
+      font-size:12px; font-family:inherit;
     }
-    .demo-bar-copy { animation:aCopyHighlight 14s ease-in-out infinite; }
+    .demo-bar-copy {
+      background:#2563eb; color:#fff; padding:4px 12px;
+      animation:aCopyHighlight 14s ease-in-out infinite;
+    }
 
     /* Wrapper for animated elements */
     .demo-el { position:relative; }
@@ -469,7 +485,7 @@ override this file or your own rules.
   <!-- HERO -->
   <div class="wrap">
     <div class="hero">
-      <div class="badge">open source &middot; 6KB &middot; zero deps</div>
+      <div class="badge">open source &middot; 11KB &middot; zero deps</div>
       <h1>Click. Comment.<br/><em>Feed to AI.</em></h1>
       <p class="sub">Annotate any webpage in seconds. Export for ChatGPT, Claude, or Cursor. One script tag — nothing else.</p>
 
@@ -502,11 +518,11 @@ override this file or your own rules.
             <div class="demo-url">mysite.com/landing<em>#tack</em></div>
           </div>
           <div class="demo-bar">
-            <b>📌 Tack</b>
+            <b>📌</b>
             <span class="demo-bar-info">2 notes</span>
-            <span class="demo-bar-sp"></span>
-            <span class="demo-bar-btn demo-bar-copy">Copy for AI (2)</span>
-            <span class="demo-bar-btn">⋯</span>
+            <span class="demo-bar-btn demo-bar-copy">Copy (2)</span>
+            <span class="demo-bar-btn">☰</span>
+            <span class="demo-bar-btn">–</span>
             <span class="demo-bar-btn">✕</span>
           </div>
           <div class="demo-body">
@@ -589,10 +605,10 @@ override this file or your own rules.
         <div class="problem-card good reveal reveal-d1">
           <div class="tag">With Tack</div>
           <ul>
-            <li>Click the heading. Type "make it bigger"</li>
-            <li>Click "Copy for AI"</li>
-            <li>AI gets: element text + CSS selector + section context</li>
-            <li>One shot. Exact change. Done.</li>
+            <li>Click the heading. Type the new wording, or just say what's wrong</li>
+            <li>Click "Copy"</li>
+            <li>AI gets: element text + section + selector + a protocol for resolving them</li>
+            <li>Reload, hit "Check what was applied", see what landed</li>
           </ul>
         </div>
       </div>
@@ -634,14 +650,18 @@ override this file or your own rules.
   <section style="padding-top:60px;padding-bottom:60px;">
     <div class="wrap">
       <div class="features reveal">
-        <span class="feature-pill">6KB gzipped</span>
+        <span class="feature-pill">11KB gzipped</span>
         <span class="feature-pill">Zero dependencies</span>
         <span class="feature-pill">Any framework</span>
-        <span class="feature-pill">localStorage only</span>
         <span class="feature-pill">Never touches your DOM</span>
+        <span class="feature-pill">Rewrite text in place</span>
+        <span class="feature-pill">Multi-select</span>
+        <span class="feature-pill">Share as a link</span>
+        <span class="feature-pill">Verify what landed</span>
         <span class="feature-pill">Shadow DOM &amp; SPA aware</span>
-        <span class="feature-pill">Text selection</span>
-        <span class="feature-pill">Multi-page reviews</span>
+        <span class="feature-pill">Light &amp; dark</span>
+        <span class="feature-pill">Freeze animations</span>
+        <span class="feature-pill">localStorage only</span>
       </div>
     </div>
   </section>
@@ -670,6 +690,47 @@ override this file or your own rules.
           <p>Undo on every destructive action, plus a restore for the last export. Nothing is ever deleted behind your back.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- TEXT EDIT -->
+  <section>
+    <div class="wrap">
+      <div class="section-label reveal">Rewrite in place</div>
+      <div class="section-title reveal">Don't describe the copy. Type it.</div>
+      <p class="section-desc reveal">Click a headline and its current text is already in the box. Change it, and the export carries an exact replacement instead of a description. Nothing to interpret, nothing to get wrong:</p>
+
+      <div class="dev-code reveal" style="max-width:640px;">
+        <span class="cm">**Current:**</span> <span class="s">`Building the future, one widget at a time.`</span><br/>
+        <span class="cm">**Change to:**</span> <span class="a">`Ship your first widget in five minutes.`</span>
+      </div>
+
+      <p class="section-desc reveal" style="margin-top:20px;">Works on attributes too — <code style="color:var(--amber);font-family:var(--mono);font-size:13px;">alt</code>, <code style="color:var(--amber);font-family:var(--mono);font-size:13px;">placeholder</code>, <code style="color:var(--amber);font-family:var(--mono);font-size:13px;">aria-label</code>, <code style="color:var(--amber);font-family:var(--mono);font-size:13px;">href</code>. And the export tells your AI to apply these verbatim, and to stop and ask if the current text has moved on since the review.</p>
+    </div>
+  </section>
+
+  <!-- SHARE LINK -->
+  <section>
+    <div class="wrap">
+      <div class="section-label reveal">Share</div>
+      <div class="section-title reveal">A whole review, in a link.</div>
+      <p class="section-desc reveal">Notes compress into the URL itself. Send it to a developer and they open your review on the real page — pins in place, text edits intact. No account, no backend, no install on either end. Nobody else can do this, because everyone else needs their server in the middle.</p>
+
+      <div class="dev-code reveal" style="max-width:640px;word-break:break-all;">
+        <span class="t">https://acme.com/pricing</span><span class="a">#tack=</span><span class="s">zVY9b8IwEP0rlmdEStuhbFWpVKlDh6ojYnDsC7Fq7Mh2QAjx33t2Q…</span>
+      </div>
+
+      <p class="section-desc reveal" style="margin-top:20px;">A designer opens your production site through the bookmarklet, marks up six things, and pastes one link into Slack. That's the entire workflow.</p>
+    </div>
+  </section>
+
+  <!-- APPLIED -->
+  <section>
+    <div class="wrap">
+      <div class="section-label reveal">Verify</div>
+      <div class="section-title reveal">Did the AI actually do it?</div>
+      <p class="section-desc reveal">Tack remembers what each annotated element looked like when you flagged it. After your agent finishes, reload the page and hit <b style="color:var(--text);">Check what was applied</b>. Elements that changed go green, ones that didn't stay amber, ones that vanished get flagged.</p>
+      <p class="section-desc reveal" style="margin-top:14px;">You get an answer in a second, without reading a diff and without trusting the summary your agent wrote about its own work.</p>
     </div>
   </section>
 
@@ -710,8 +771,12 @@ override this file or your own rules.
             <tr><td>Build step</td><td class="us yes">None</td><td class="no">Required</td><td class="no">Required</td><td class="no">n/a</td></tr>
             <tr><td>Pages you don't own</td><td class="us yes">Yes (bookmarklet)</td><td class="no">No</td><td class="no">Localhost only</td><td>Yes</td></tr>
             <tr><td>Ship to production</td><td class="us yes">Yes, dormant</td><td class="no">Dev-only</td><td class="no">No</td><td class="no">No</td></tr>
-            <tr><td>Size</td><td class="us">6KB gzip</td><td class="no">672KB ESM</td><td>Extension + server</td><td>Extension</td></tr>
+            <tr><td>Size</td><td class="us">11KB gzip</td><td class="no">672KB ESM</td><td>Extension + server</td><td>Extension</td></tr>
             <tr><td>License</td><td class="us yes">MIT</td><td class="no">PolyForm Shield</td><td>MIT</td><td class="no">Custom</td></tr>
+            <tr><td>Rewrite text in place</td><td class="us yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Share review as a link</td><td class="us yes">Yes, no server</td><td class="no">Needs their server</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Verify what was applied</td><td class="us yes">Yes, offline</td><td class="no">Via MCP only</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Multi-select</td><td class="us yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Agent sync loop (MCP)</td><td class="no">Not yet</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
             <tr><td>React source file + line</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Layout / wireframe mode</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
@@ -728,7 +793,7 @@ override this file or your own rules.
       <div class="section-label reveal">For developers</div>
       <div class="section-title reveal">Keep it in production. Seriously.</div>
       <p class="section-desc reveal" style="max-width:580px;">Until <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">#tack</code> appears in the URL hash, Tack registers one idle keyboard listener and stops. No DOM changes, no network requests, no work on your page. That's why you can leave it in a production build and review the live site — or send the link to someone who has no local checkout.</p>
-      <p class="section-desc reveal" style="max-width:580px;margin-top:12px;">Once you activate it, it's honest about what it does: a fixed toolbar at the top, clicks intercepted so they annotate instead of navigate, and an overlay drawn above your page. It never writes into your DOM — annotated elements are marked from the outside, so <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">&lt;img&gt;</code>, inputs and SVG survive intact. Press <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">✕</code> and every trace is gone.</p>
+      <p class="section-desc reveal" style="max-width:580px;margin-top:12px;">Once you activate it, it's honest about what it does: a floating toolbar in the corner, clicks and hovers caught so they annotate instead of navigate, and an overlay drawn above your page. It never writes into your DOM and never shifts your layout — annotated elements are marked from the outside, so <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">&lt;img&gt;</code>, inputs and SVG survive intact. Press <code style="color:var(--amber);font-family:var(--mono);font-size:14px;">✕</code> and every trace is gone.</p>
 
       <div class="dev-code reveal">
         <span class="cm">&lt;!-- It's fine. Tack sleeps until #tack. --&gt;</span><br/>

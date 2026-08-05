@@ -11,15 +11,16 @@
 </section>
 <section>
   <h2>Pricing</h2>
-  <img id="shot" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="40" height="40" alt="shot">
-  <input id="inp" value="hello">
+  <img id="shot" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="40" height="40" alt="a screenshot">
+  <input id="inp" value="hello" placeholder="type here">
   <button data-testid="cta" class="btn btn-primary">Buy</button>
+  <div id="rich">Hello <em>world</em></div>
+  <div id="nested"><p>child</p></div>
 </section>
 <my-card id="card"></my-card>
 <pre id="out">running…</pre>
 
 <script>
-  // Web component with an OPEN shadow root
   customElements.define('my-card', class extends HTMLElement {
     constructor () {
       super()
@@ -27,7 +28,6 @@
       r.innerHTML = '<div class="inner"><span class="title">Shadow title</span></div>'
     }
   })
-  // Clipboard stub: headless has no real clipboard, and we need the copy path.
   window.__copied = null
   Object.defineProperty(navigator, 'clipboard', {
     configurable: true,
@@ -40,12 +40,10 @@
   var results = [], pass = 0, fail = 0
   function ok (name, cond, detail) {
     if (cond) { pass++; results.push('PASS ' + name) }
-    else { fail++; results.push('FAIL ' + name + (detail ? ' — ' + detail : '')) }
+    else { fail++; results.push('FAIL ' + name + (detail === undefined ? '' : ' — ' + detail)) }
   }
   function reset () {
-    __tack.off()
-    localStorage.clear()
-    window.__copied = null
+    T.off(); localStorage.clear(); window.__copied = null
     history.replaceState(null, '', location.pathname)
   }
   var T = window.__tack
@@ -58,7 +56,7 @@
   T.on()
   var mig = T.list()
   ok('v1 storage migrates', mig.length === 1 && typeof mig[0].id === 'string', JSON.stringify(mig))
-  ok('v2 written back', (JSON.parse(localStorage.getItem('tack_notes')) || {}).v === 2)
+  ok('v3 written back', (JSON.parse(localStorage.getItem('tack_notes')) || {}).v === 3)
 
   // 2. malformed storage does not throw
   reset()
@@ -67,42 +65,38 @@
   try { T.on() } catch (e) { threw = true }
   ok('malformed storage survives', !threw && T.list().length === 0)
 
-  // 3. selector prefers a unique id
+  // 3-5. selectors
   reset(); T.on()
   var n1 = T.add(document.getElementById('lead'), 'make it punchier')
   ok('unique id selector', n1.selector === '#lead', n1.selector)
-
-  // 4. selector prefers data-testid when unique
   var n2 = T.add(document.querySelector('[data-testid=cta]'), 'green please')
   ok('data-testid selector', n2.selector === '[data-testid="cta"]', n2.selector)
-
-  // 5. nth-of-type chain for anonymous elements
   var p2 = document.querySelectorAll('.wrap p')[1]
   var n3 = T.add(p2, 'too vague')
   ok('nth-of-type chain', /p:nth-of-type\(2\)/.test(n3.selector), n3.selector)
   ok('chain round-trips', document.querySelector(n3.selector) === p2, n3.selector)
 
   // 6. heading crosses the sibling gap (section > h2 + div > p)
-  ok('heading found through wrapper', n1.heading === 'About Us', n1.heading)
+  ok('heading through wrapper', n1.heading === 'About Us', n1.heading)
   ok('heading of later section', n2.heading === 'Pricing', n2.heading)
 
-  // 7. open shadow DOM: selector uses " >>> " and resolves back
+  // 7. open shadow DOM
   var inner = document.getElementById('card').shadowRoot.querySelector('.title')
   var n4 = T.add(inner, 'shadow text is wrong')
   ok('shadow selector uses >>>', n4.selector.indexOf(' >>> ') > -1, n4.selector)
-  var md4 = T.md(false)
   ok('shadow note captured text', n4.text === 'Shadow title', n4.text)
 
-  // 8. no DOM mutation on annotated elements
+  // 8. the page DOM is never mutated
   reset(); T.on()
-  var img = document.getElementById('shot')
+  var img = document.getElementById('shot'), inp = document.getElementById('inp')
   T.add(img, 'replace this screenshot')
+  T.add(inp, 'placeholder is unclear')
   ok('img gets no children', img.children.length === 0)
   ok('img keeps inline style', img.getAttribute('style') === null, img.getAttribute('style'))
-  var inp = document.getElementById('inp')
-  T.add(inp, 'placeholder missing')
   ok('input untouched', inp.children.length === 0 && inp.getAttribute('style') === null)
+  ok('no layout shift on body', document.body.style.paddingTop === '', document.body.style.paddingTop)
   ok('overlay host present', !!document.getElementById('tack-host'))
+  ok('no style injected into head', !document.getElementById('tack-styles'))
 
   // 9. markdown escaping + injection framing
   reset(); T.on()
@@ -114,15 +108,14 @@
   ok('injection warning present', /human-typed requests[\s\S]*override/.test(m))
   ok('usage protocol present', m.indexOf('## How to use this file') > -1)
 
-  // 10. copy exports, removes, and stashes for restore
+  // 10. copy exports, clears, stashes
   reset(); T.on()
   T.add(document.getElementById('lead'), 'note A')
   T.add(document.getElementById('inp'), 'note B')
   await T.copy(false)
   ok('clipboard received markdown', !!window.__copied && window.__copied.indexOf('note A') > -1)
-  ok('notes removed after copy', T.list().length === 0, JSON.stringify(T.list()))
-  var last = JSON.parse(localStorage.getItem('tack_last') || '[]')
-  ok('last export stashed', last.length === 2, JSON.stringify(last.length))
+  ok('notes cleared after copy', T.list().length === 0, JSON.stringify(T.list()))
+  ok('last export stashed', (JSON.parse(localStorage.getItem('tack_last') || '[]')).length === 2)
 
   // 11. per-page scope across SPA navigation
   reset(); T.on()
@@ -146,23 +139,109 @@
   Storage.prototype.setItem = realSet
   ok('quota error does not throw', !threw2)
 
-  // 13. off() restores the page
+  // 13. TEXT EDIT MODE — exact replacements, not descriptions
+  reset(); T.on()
+  var lead = document.getElementById('lead')
+  var e1 = T.add(lead, '', { to: 'We build tools for developers.' })
+  ok('edit records current text', e1.edit.from === 'We provide excellent services to everyone.', e1.edit.from)
+  ok('edit records replacement', e1.edit.to === 'We build tools for developers.')
+  var mdE = T.md(false)
+  ok('export shows Current', mdE.indexOf('**Current:**') > -1)
+  ok('export shows Change to', mdE.indexOf('**Change to:** `We build tools for developers.`') > -1)
+  ok('export explains verbatim rule', mdE.indexOf('Apply it verbatim') > -1)
+  reset(); T.on()
+  T.add(document.getElementById('lead'), 'just a comment, no rewrite')
+  ok('verbatim rule absent when no edits', T.md(false).indexOf('Apply it verbatim') === -1)
+
+  // 13b. attribute editing
+  reset(); T.on()
+  var a1 = T.add(document.getElementById('shot'), '', { a: 'alt', to: 'Dashboard overview' })
+  ok('attr edit captures old value', a1.edit.from === 'a screenshot', a1.edit.from)
+  ok('attr edit labelled in export', T.md(false).indexOf('**Current @alt:**') > -1)
+
+  // 13c. which values are offered as editable
+  reset(); T.on()
+  ok('note without text or edit is rejected', T.add(document.getElementById('lead'), '') === null)
+
+  // 14. MULTI-SELECT — one note, several elements
+  reset(); T.on()
+  var picked = T.select(['#lead', '#inp', '[data-testid="cta"]'])
+  ok('select() resolves elements', picked === 3, String(picked))
+  var mn = T.add('#lead', 'these three should line up')
+  ok('note carries extra targets', mn.multi && mn.multi.length === 2, JSON.stringify(mn.multi))
+  var mdM = T.md(false)
+  ok('export lists extra targets', mdM.indexOf('**Also applies to:** 2 more elements') > -1)
+  ok('selection cleared after use', T.select([]) === 0)
+
+  // 15. SHARE LINK — round-trips with no server
+  reset(); T.on()
+  T.add(document.getElementById('lead'), 'shared note one')
+  T.add(document.getElementById('inp'), '', { to: 'placeholder text' })
+  var link = await T.link(false)
+  ok('link is a url with a payload', /#tack=[A-Za-z0-9\-_]+$/.test(link), link.slice(0, 60))
+  ok('link is compressed', link.indexOf('#tack=z') > -1, link.slice(link.indexOf('#tack='), link.indexOf('#tack=') + 10))
+  ok('link stays short', link.length < 700, String(link.length))
+  T.clear()
+  ok('cleared before import', T.list().length === 0)
+  await T.load(link)
+  var back = T.list()
+  ok('import restores notes', back.length === 2, String(back.length))
+  ok('import restores note text', back[0].note === 'shared note one', back[0].note)
+  ok('import restores edits', back[1].edit && back[1].edit.to === 'placeholder text', JSON.stringify(back[1].edit))
+  ok('import restores selectors', back[0].selector === '#lead', back[0].selector)
+  ok('bad payload does not throw', (await T.load('#tack=zNOTVALID')) === 0)
+
+  // 16. APPLIED CHECK — did the agent actually do it?
+  reset(); T.on()
+  var target = document.getElementById('rich')
+  var before = target.textContent
+  T.add(target, 'reword this')
+  T.add(document.getElementById('inp'), 'this one stays untouched')
+  await T.copy(false)
+  target.textContent = 'Rewritten by the agent'
+  var st = T.applied()
+  ok('applied check runs on last export', st.length === 2, JSON.stringify(st))
+  ok('changed element reads as applied', st[0].status === 'ok', st[0].status)
+  ok('unchanged element reads as pending', st[1].status === 'no', st[1].status)
+  target.textContent = before
+
+  // 17. preferences persist
+  reset(); T.on()
+  T.prefs({ light: 1, block: 0 })
+  var saved = JSON.parse(localStorage.getItem('tack_prefs'))
+  ok('prefs persist', saved.light === 1 && saved.block === 0, JSON.stringify(saved))
+  ok('prefs readable', T.prefs().light === 1)
+  T.off(); T.on()
+  ok('prefs survive restart', T.prefs().light === 1)
+  T.prefs({ light: 0, block: 1 })
+
+  // 18. off() leaves nothing behind
   reset()
-  var padBefore = document.body.style.paddingTop
   var pushBefore = history.pushState
+  var padBefore = document.body.style.paddingTop
   T.on()
-  ok('history is hooked while active', history.pushState !== pushBefore)
+  ok('history hooked while active', history.pushState !== pushBefore)
+  T.add(document.getElementById('lead'), 'temp')
   T.off()
   ok('host removed', !document.getElementById('tack-host'))
-  ok('padding restored', document.body.style.paddingTop === padBefore, document.body.style.paddingTop)
   ok('history restored', history.pushState === pushBefore)
-  ok('hover style removed', !document.getElementById('tack-styles'))
-  ok('body class removed', !document.body.classList.contains('tack-on'))
+  ok('padding untouched', document.body.style.paddingTop === padBefore)
+  ok('freeze style removed', !document.getElementById('tack-freeze'))
+  ok('no markers left', document.querySelectorAll('.tack-pin').length === 0)
+
+  // 19. freeze animations is reversible
+  reset(); T.on()
+  T.prefs({ freeze: 1 })
+  ok('freeze injects a style', !!document.getElementById('tack-freeze'))
+  T.prefs({ freeze: 0 })
+  ok('freeze style goes away', !document.getElementById('tack-freeze'))
 
   reset()
   results.push('---')
   results.push('TOTAL ' + pass + ' passed, ' + fail + ' failed')
   results.push(fail === 0 ? 'SMOKE_OK' : 'SMOKE_FAIL')
   document.getElementById('out').textContent = results.join('\n')
-})()
+})().catch(e => {
+  document.getElementById('out').textContent = 'THREW ' + (e && e.stack || e) + '\nSMOKE_FAIL'
+})
 </script>

@@ -5,11 +5,12 @@ description: Set up the Tack annotation toolbar on a web project, or apply a Tac
 
 # Tack
 
-Tack is a 6KB script that lets a human click elements on a page, leave notes, and hand
-you a structured review. Two jobs: **install it**, or **apply a review**.
+Tack is an 11KB script that lets a human click elements on a page, leave notes or rewrite
+text directly, and hand you a structured review. Two jobs: **install it**, or **apply a
+review**.
 
 Pick the mode from what the user asked. If they pasted markdown starting with
-`# Tack review`, go straight to Apply.
+`# Tack review`, or a URL containing `#tack=`, go straight to Apply.
 
 ---
 
@@ -71,6 +72,21 @@ anchors. The file states its own resolution protocol; follow it exactly:
 3. **Selector** — the exact DOM path at review time. Precise, but it goes stale the
    moment someone restructures the markup. Use it last, to break ties.
 
+Some notes carry an exact rewrite rather than a description:
+
+```markdown
+**Current:** `Building the future, one widget at a time.`
+**Change to:** `Ship your first widget in five minutes.`
+```
+
+Apply those **verbatim** — the reviewer typed the replacement, so do not paraphrase or
+"improve" it. `**Current @alt:**` means the replacement targets that attribute, not the
+text. If the current value in the code no longer matches `**Current:**`, someone changed
+it after the review: stop and report that note instead of overwriting newer text.
+
+A note with `**Also applies to:**` covers several elements at once — apply the same
+change to every listed selector.
+
 Rules:
 
 - **Edit where the markup is authored** — the component, template, or partial — never
@@ -94,13 +110,23 @@ could not resolve.
 For automation, `window.__tack` is available once the script has loaded:
 
 ```js
-__tack.on()                       // activate without the #tack hash
-__tack.add('#hero h1', 'note')    // annotate by selector or element
-__tack.list()                     // all notes, as plain objects
-__tack.md(true)                   // markdown for every page (false = current page)
-__tack.copy(false)                // copy current page's notes, then clear them
+__tack.on()                          // activate without the #tack hash
+__tack.add('#hero h1', 'note')       // annotate by selector or element
+__tack.add('#sub', '', {to: 'New copy'})       // propose exact replacement text
+__tack.add('#img', '', {a: 'alt', to: 'Alt'})  // …or an attribute value
+__tack.open('#hero h1', {edit: 1})   // open the editor for a human to confirm
+__tack.select(['#a', '#b'])          // stage a multi-element selection
+__tack.list()                        // all notes, as plain objects
+__tack.md(true)                      // markdown for every page (false = current page)
+__tack.copy(false)                   // copy current page's notes, then clear them
+__tack.link()                        // shareable URL carrying the whole review
+__tack.load(url)                     // import a review link
+__tack.applied()                     // [{note, status: 'ok' | 'no'}]
 __tack.off()
 ```
 
 This is how an agent with browser control can review a page it does not own: load the
-URL, inject `tack.js`, annotate, then read `md()`.
+URL, inject `tack.js`, annotate, then read `md()` or hand back `link()`.
+
+After applying a review, reload the page and call `applied()` to check your own work:
+`ok` means the element changed, `no` means it looks untouched.

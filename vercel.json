@@ -1,4 +1,4 @@
 {
   "framework": "astro",
-  "buildCommand": "cp tack.js public/tack.js && astro build"
+  "buildCommand": "npm run build"
 }

@@ -1,0 +1,98 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Northwind — analytics for teams</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box }
+  body { font:16px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; color:#0f172a; background:#fff }
+  .nav { display:flex; align-items:center; gap:28px; padding:18px 48px; border-bottom:1px solid #eef2f7 }
+  .nav .logo { font-weight:700; font-size:17px; letter-spacing:-.02em }
+  .nav a { color:#64748b; text-decoration:none; font-size:14px }
+  .nav .sp { flex:1 }
+  .nav .cta { background:#0f172a; color:#fff; padding:8px 16px; border-radius:7px; font-size:14px; font-weight:500 }
+  .hero { padding:72px 48px 60px; max-width:900px }
+  .hero h1 { font-size:46px; line-height:1.1; letter-spacing:-.035em; font-weight:700; margin-bottom:18px }
+  .hero p { font-size:19px; color:#64748b; max-width:560px; margin-bottom:28px }
+  .hero .row { display:flex; gap:12px }
+  .btn { border:0; font:500 15px inherit; padding:11px 22px; border-radius:8px; cursor:pointer }
+  .btn-p { background:#2563eb; color:#fff }
+  .btn-s { background:#fff; color:#0f172a; border:1px solid #e2e8f0 }
+  .feat { padding:0 48px 80px; max-width:1000px }
+  .feat h2 { font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:#94a3b8; margin-bottom:20px }
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
+  .card { border:1px solid #e9eef5; border-radius:12px; padding:20px }
+  .card h3 { font-size:15px; margin-bottom:6px; letter-spacing:-.01em }
+  .card p { font-size:14px; color:#64748b; line-height:1.5 }
+</style>
+
+<div class="nav">
+  <span class="logo">Northwind</span>
+  <a href="#">Product</a><a href="#">Pricing</a><a href="#">Docs</a>
+  <span class="sp"></span>
+  <span class="cta">Start free</span>
+</div>
+
+<div class="hero">
+  <h1 id="headline">Building the future of data, one query at a time</h1>
+  <p id="sub">Northwind is a next-generation platform that empowers teams to leverage their data.</p>
+  <div class="row">
+    <button class="btn btn-p" id="cta">Get started</button>
+    <button class="btn btn-s">Book a demo</button>
+  </div>
+</div>
+
+<div class="feat">
+  <h2>Features</h2>
+  <div class="cards">
+    <div class="card"><h3>Fast queries</h3><p>Sub-second responses across billions of rows.</p></div>
+    <div class="card"><h3>Live dashboards</h3><p>Charts that update as the data lands.</p></div>
+    <div class="card"><h3>Team access</h3><p>Roles, audit logs and SSO out of the box.</p></div>
+  </div>
+</div>
+
+<script src="/tack.js"></script>
+<script>
+  // fake cursor: headless screenshots do not include a pointer
+  var c = document.createElement('div')
+  c.id = '__cursor'
+  c.style.cssText = 'position:fixed;left:-100px;top:-100px;width:22px;height:22px;z-index:2147483647;' +
+    'pointer-events:none;transition:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))'
+  c.innerHTML = '<svg viewBox="0 0 22 22" width="22" height="22"><path d="M4 2l13 7.5-5.6 1.4-1.6 5.6z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>'
+  document.body.appendChild(c)
+  window.__cursor = function (x, y) { c.style.left = x + 'px'; c.style.top = y + 'px' }
+  window.__cursorDown = function (d) { c.style.transform = d ? 'scale(.85)' : 'scale(1)' }
+
+  // Second beat: what actually lands in the agent. The text is the real export,
+  // captured from the tool before Copy clears it — nothing is retyped for the shot.
+  var pane = document.createElement('div')
+  pane.id = '__paste'
+  pane.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#0b1220;' +
+    'opacity:0;transition:opacity .28s ease;pointer-events:none;display:flex;flex-direction:column'
+  pane.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;padding:11px 18px;border-bottom:1px solid #1e293b;' +
+    'font:12px system-ui;color:#64748b"><span style="width:9px;height:9px;border-radius:50%;background:#ef4444"></span>' +
+    '<span style="width:9px;height:9px;border-radius:50%;background:#f59e0b"></span>' +
+    '<span style="width:9px;height:9px;border-radius:50%;background:#22c55e"></span>' +
+    '<span style="margin-left:10px">your coding agent — <b style="color:#94a3b8;font-weight:500">⌘V</b></span></div>' +
+    '<div id="__scroll" style="flex:1;overflow:hidden;padding:16px 22px"><pre id="__md" style="margin:0;' +
+    'font:12.5px/1.75 ui-monospace,SFMono-Regular,Menlo,monospace;color:#94a3b8;white-space:pre-wrap"></pre></div>'
+  document.body.appendChild(pane)
+
+  window.__showPaste = function (md) {
+    var pre = document.getElementById('__md')
+    // highlight the two lines that carry an exact replacement
+    pre.innerHTML = md.split('\n').map(function (l) {
+      if (/^\*\*(Current|Change to|Style)/.test(l)) return '<span style="color:#f59e0b">' + esc(l) + '</span>'
+      if (/^  - `/.test(l)) return '<span style="color:#f59e0b">' + esc(l) + '</span>'
+      if (/^## /.test(l) || /^# /.test(l)) return '<span style="color:#e2e8f0">' + esc(l) + '</span>'
+      if (/^&gt;|^>/.test(l)) return '<span style="color:#cbd5e1">' + esc(l) + '</span>'
+      return esc(l)
+    }).join('\n')
+    document.body.appendChild(pane)   // last child wins at equal z-index
+    pane.style.opacity = '1'
+    function esc (t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+  }
+  window.__scrollPaste = function (y) { document.getElementById('__scroll').scrollTop = y }
+  window.__scrollMax = function () {
+    var e = document.getElementById('__scroll'); return e.scrollHeight - e.clientHeight
+  }
+</script>

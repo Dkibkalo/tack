@@ -8,10 +8,9 @@ Status: **next** (agreed, ready to build) · **later** (agreed, not scheduled) �
 
 ---
 
-## Shipped in 0.5.0
+## Shipped
 
-The four items below landed together; kept here for a release or two so the reasoning
-stays attached to the code.
+Kept here for a release or two so the reasoning stays attached to the code.
 
 ### Batch protocol in the export — done
 When an export carries more than one note, the header should tell the agent to read
@@ -70,36 +69,38 @@ what was applied" marks a freeform note applied whenever the element's text chan
 which is a false positive for any unrelated edit, so it should not be sold as hard
 verification.
 
+### Style adjust with live preview — done, 0.6.0
+Change size, line height, weight, colour, background, padding, gap or radius on the
+element and watch the page update; save and it reverts, leaving a note with exact
+before and after. Verified by the applied check like a text rewrite, because the
+values are exact.
+
+Preview is `Element.animate()` paused with `fill:'both'`, cancelled to revert. Proven
+in a browser: no attribute and no inline style added, an existing inline style
+survives, it reaches inside an open shadow root, layout properties revert cleanly.
+`commitStyles()` is never called — it would write into the style attribute.
+
+`!important` wins over it. The row says `locked by !important` rather than showing
+nothing, and the note still records the request so an agent knows the rule has to go.
+One trap found while building: when the browser refuses the change it resolves to the
+old value, and recording that as "resolved to" made the applied check pass on a change
+nobody had made. Only record a resolved value when it differs from both the request
+and the original.
+
+The landing's "never shifts your layout" claim was dropped, on the owner's call.
+
 ---
 
 ## Agreed, not scheduled
 
-### Style adjust with live preview — later
-The marquee feature of Codex's annotate mode: change font, spacing and colour on the
-element, see it live, and send the exact before-and-after. It maps onto the existing
-`Current:` / `Change to:` shape.
+### Trim the bundle — later
+0.3.5 was 11352 bytes gzipped; 0.6.0 is 15524, up 37% across mobile support, DOM
+events, the batch protocol, source hints, region notes and style preview. Most of the
+growth is prose in the export, which is the part users praise, so cutting it is not
+obviously right. Worth a measured pass before it goes further: which paragraphs earn
+their bytes, and whether the export protocol could be fetched rather than inlined
+without breaking the no-network promise.
 
-Mechanism is settled and verified in a browser: `Element.animate()` paused with
-`fill:'both'`, cancelled to revert. Measured on a test page — the element gains no
-attribute and no inline style, an existing inline style survives untouched, it reaches
-inside an open shadow root, and layout properties revert cleanly. It does not beat
-`!important` (18px stayed 18px), which is detectable by reading the computed value
-after applying, so the UI can say so instead of lying. Never call `commitStyles()` — it
-writes into the element's `style` attribute.
-
-Not a small job: it touches the popup, the note schema, the share payload, the export
-and the applied check. Keep it off the `edit` object, which means one text or attribute
-replacement and is what verification assumes; add `style: [{p, from, to}]` instead.
-
-Export observed computed values, and tell the agent to keep existing tokens and units —
-otherwise `var(--text-lg)` and `1rem` come back as hard-coded pixels. Start with
-`font-size`, `line-height`, `font-weight`, `color`, `background-color`, `padding`,
-`gap`, `border-radius`. Margin and font family can wait.
-
-**Needs a decision first:** the landing says Tack "never shifts your layout", and
-previewing padding makes that false. Proposed wording: annotations and markers never
-rewrite or insert content into the elements you review; Freeze and style preview
-temporarily alter presentation and are reverted when disabled.
 
 ### MCP sync loop — later
 Deliberately shipped the copy-paste path first: the moment the answer to "how do I use

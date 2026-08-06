@@ -8,7 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
-  var VER = '0.5.0', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
+  var VER = '0.6.0', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -207,6 +207,13 @@ textarea{height:66px;resize:vertical} textarea:focus,select:focus{outline:2px so
 select{margin-bottom:6px;height:30px;padding:4px 6px}
 .was{font:11px/1.4 ui-monospace,monospace;color:var(--mut);background:var(--in);border:1px solid var(--bd);
 border-radius:6px;padding:6px 8px;margin-bottom:6px;max-height:54px;overflow:auto;white-space:pre-wrap}
+.sty{display:grid;gap:6px;max-height:210px;overflow:auto}
+.srow{display:flex;align-items:center;gap:8px;font:12px system-ui;color:var(--mut)}
+.srow label{flex:0 0 78px}
+.srow input{flex:1;min-width:0;background:var(--in);color:var(--fg);border:1px solid var(--bd);
+border-radius:6px;padding:5px 7px;font:12px system-ui;box-sizing:border-box}
+.srow input[type=color]{padding:2px;height:27px;cursor:pointer}
+.srow em{font-style:normal;color:var(--ac);font-size:10px;flex:0 0 auto}
 .row{display:flex;gap:6px;margin-top:8px;align-items:center} .row .f{flex:1}
 .row button{padding:5px 12px;border-radius:6px;font:12px system-ui;color:#fff}
 .sv{background:#2563eb} .cn{background:#475569} .dl{background:#dc2626}
@@ -242,6 +249,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
 .pill .tog{padding:8px 10px} .tabs button{padding:8px 12px} .row button{padding:9px 14px}
 .menu button{padding:11px 10px} .menu label{padding:10px}
 .hd button{padding:6px 8px} .mini{width:52px;height:52px}
+.srow input{padding:9px 8px} .sty{max-height:38vh}
 .mk::after{content:'';position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
 .tst{bottom:calc(80px + var(--vb))} .chip{bottom:calc(136px + var(--vb))}
 }`
@@ -424,7 +432,49 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
   }
 
   // --- Popup ---
-  function closePop () { gone('.pop') }
+  // --- Style preview ---
+  //
+  // Showing a proposed style has to change how the element looks without changing the
+  // element. A paused, filled Web Animation does exactly that: it sits above the author
+  // cascade and inline styles, reaches inside an open shadow root, and leaves nothing
+  // behind when cancelled — no attribute, no inline style. commitStyles() would write
+  // into the style attribute, so it is never called. `!important` still wins, which is
+  // why applyPreview reports back what actually took effect.
+  var STYLES = [
+    ['font-size', 'Size'], ['line-height', 'Line height'], ['font-weight', 'Weight'],
+    ['color', 'Colour'], ['background-color', 'Background'],
+    ['padding', 'Padding'], ['gap', 'Gap'], ['border-radius', 'Radius']
+  ]
+  var anim = null
+  function camel (p) { return p.replace(/-(\w)/g, (m, c) => c.toUpperCase()) }
+  function dropPreview () { if (anim) { try { anim.cancel() } catch (e) {} anim = null } }
+  function applyPreview (target, changes) {
+    dropPreview()
+    if (!target || !changes.length || !target.animate) return {}
+    var kf = {}
+    changes.forEach(function (c) { kf[camel(c.p)] = c.to })
+    try {
+      anim = target.animate([kf], { duration: 1, fill: 'both' })
+      anim.pause(); anim.currentTime = 1
+    } catch (e) { anim = null; return {} }
+    // what the browser actually settled on, which is not the request when !important wins
+    var cs = W.getComputedStyle(target), out = {}
+    changes.forEach(function (c) { out[c.p] = cs.getPropertyValue(c.p) })
+    return out
+  }
+  function styleRows (target) {
+    if (!target || !target.animate || !W.getComputedStyle) return []
+    var cs = W.getComputedStyle(target)
+    return STYLES.filter(s => s[0] !== 'gap' || /flex|grid/.test(cs.display))
+      .map(s => ({ p: s[0], label: s[1], from: cs.getPropertyValue(s[0]) }))
+  }
+  function hexOf (v) {
+    var m = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(v || '')
+    if (!m || (m[4] !== undefined && +m[4] < 1)) return ''
+    return '#' + [m[1], m[2], m[3]].map(n => ('0' + (+n).toString(16)).slice(-2)).join('')
+  }
+
+  function closePop () { dropPreview(); gone('.pop') }
   function closeAll () { closePop(); gone('.menu'); gone('.chip') }
 
   function popup (rect, opts) {
@@ -436,9 +486,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     p.appendChild(hd)
 
     var av = opts.edits || [], tab = 0
+    var sr = styleRows(opts.styleEl)
     var tabs = el('div', 'tabs')
     var bNote = el('button', 'on', 'Comment'), bEdit = el('button', null, '✎ Edit text')
+    var bSty = el('button', null, '◨ Style')
     tabs.appendChild(bNote); if (av.length) tabs.appendChild(bEdit)
+    if (sr.length) tabs.appendChild(bSty)
     p.appendChild(tabs)
 
     var body = el('div', 'bd2')
@@ -465,18 +518,60 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     if (av.length) syncEdit()
     pick.onchange = () => { te.value = av[+pick.value].v; syncEdit() }
 
+    // --- style tab ---
+    var styBox = el('div', 'sty'), styIn = {}
+    var seeded = {}
+    ;(opts.style || []).forEach(function (s) { seeded[s.p] = s.to })
+    sr.forEach(function (r) {
+      var line = el('div', 'srow')
+      line.appendChild(el('label', null, r.label))
+      var h = hexOf(r.from)
+      var inp = D.createElement('input')
+      inp.type = h && /color/.test(r.p) ? 'color' : 'text'
+      inp.value = seeded[r.p] !== undefined ? seeded[r.p] : (inp.type === 'color' ? h : r.from)
+      inp.oninput = repaint
+      styIn[r.p] = { input: inp, from: r.from }
+      line.appendChild(inp)
+      var warn = el('em', 'no'); line.appendChild(warn)
+      styIn[r.p].warn = warn
+      styBox.appendChild(line)
+    })
+    function styChanges () {
+      return sr.map(function (r) {
+        var v = (styIn[r.p].input.value || '').trim()
+        return v && v !== r.from && v !== hexOf(r.from) ? { p: r.p, from: r.from, to: v } : null
+      }).filter(Boolean)
+    }
+    function repaint () {
+      var ch = styChanges()
+      var got = applyPreview(opts.styleEl, ch)
+      sr.forEach(function (r) { styIn[r.p].warn.textContent = '' })
+      ch.forEach(function (c) {
+        // a rule marked !important cannot be beaten; say so instead of pretending
+        if (got[c.p] !== undefined && got[c.p] !== c.to && hexOf(got[c.p]) !== c.to) {
+          styIn[c.p].warn.textContent = 'locked by !important'
+        }
+      })
+    }
+
     body.appendChild(ta); p.appendChild(body)
     function show (i) {
       tab = i
       bNote.className = i === 0 ? 'on' : ''
       bEdit.className = i === 1 ? 'on' : ''
+      bSty.className = i === 2 ? 'on' : ''
       body.textContent = ''
       if (i === 0) body.appendChild(ta)
-      else { body.appendChild(pick); body.appendChild(was); body.appendChild(te) }
+      else if (i === 1) { body.appendChild(pick); body.appendChild(was); body.appendChild(te) }
+      else body.appendChild(styBox)
       body.appendChild(row)
-      ;(i === 0 ? ta : te).focus()
+      // the style tab is much taller than the others, so a popup placed clear of the
+      // element can end up on top of it — which is useless when the point is to watch
+      // that element change. Re-place, unless the reviewer has dragged it themselves.
+      if (!p.moved) place(p, rect)
+      if (i !== 2) (i === 0 ? ta : te).focus()
     }
-    bNote.onclick = () => show(0); bEdit.onclick = () => show(1)
+    bNote.onclick = () => show(0); bEdit.onclick = () => show(1); bSty.onclick = () => show(2)
 
     var row = el('div', 'row')
     if (opts.onDel) {
@@ -492,11 +587,26 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       if (av.length && te.value.trim() && te.value.trim() !== av[ai].v) {
         edit = { a: av[ai].a, from: av[ai].v, to: te.value.trim() }
       }
-      if (!note && !edit) return
-      opts.onSave(note, edit); closePop()
+      // record what the browser resolved the request to, so the applied check has
+      // something exact to compare against later even if the input was "1.5rem"
+      var style = styChanges()
+      if (style.length && opts.styleEl && W.getComputedStyle) {
+        var cs2 = W.getComputedStyle(opts.styleEl)
+        style.forEach(function (s) {
+          var got = cs2.getPropertyValue(s.p)
+          // Only worth recording when the browser resolved the request to something
+          // else — "1.5rem" becoming "24px". If it came back as the old value the
+          // request never took (an !important rule), and storing that would make the
+          // applied check pass on a change nobody made.
+          if (got && got !== s.to && got !== s.from) s.tc = got
+        })
+      }
+      if (!note && !edit && !style.length) return
+      opts.onSave(note, edit, style); closePop()
     }
     row.appendChild(sb); body.appendChild(row)
     if (opts.edit) show(1)
+    else if (opts.style && opts.style.length) show(2)
 
     function key (e) {
       if (e.key === 'Escape') { e.stopPropagation(); closePop() }
@@ -536,6 +646,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       e.preventDefault()
       var r = p.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top
       function mv (ev) {
+        p.moved = 1
         var v = vbox()
         p.style.left = Math.max(v.l, Math.min(ev.clientX - dx, v.r - r.width)) + 'px'
         p.style.top = Math.max(v.t, Math.min(ev.clientY - dy, v.b - 40)) + 'px'
@@ -590,7 +701,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
               popup(mk.getBoundingClientRect(), {
                 label: n.heading || n.text || 'note ' + (i + 1),
                 note: n.note, edit: n.edit, edits: t ? edits(t) : [],
-                onSave: function (note, edit) { n.note = note; n.edit = edit; save(); render() },
+                style: n.style, styleEl: t,
+                onSave: function (note, edit, style) {
+                  n.note = note; n.edit = edit
+                  if (style && style.length) n.style = style; else delete n.style
+                  save(); render()
+                },
                 onDel: function () { notes = notes.filter(x => x.id !== n.id); save(); render() }
               })
             }
@@ -789,8 +905,9 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     popup(rect, {
       label: name(target) + (stext ? ' · selection' : ''),
       edits: av,
+      styleEl: stext ? null : target,
       edit: startEdit && av.length ? { a: av[0].a, from: av[0].v, to: av[0].v } : null,
-      onSave: function (note, edit) {
+      onSave: function (note, edit, style) {
         var n = {
           id: nid(), path: path(), url: url(), ts: Date.now(),
           selector: sel(target), heading: heading(target), text: txt(target), note: note,
@@ -799,10 +916,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         }
         if (stext) n.stext = stext
         if (edit) n.edit = edit
+        if (style && style.length) n.style = style
         if (extra && extra.length) n.multi = extra.map(sel)
         withSrc(n, target)
         notes.push(n); picked = []; save(); render()
-        emit('note', { here: here().length, total: notes.length, edit: !!edit, multi: (n.multi || []).length, source: !!n.src })
+        emit('note', { here: here().length, total: notes.length, edit: !!edit,
+          style: (style || []).length, multi: (n.multi || []).length, source: !!n.src })
       }
     })
   }
@@ -906,6 +1025,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       (anyEdit ? 'A note with **Change to:** is an exact replacement the reviewer typed. Apply it verbatim —\n' +
         'do not paraphrase or "improve" it. **Current:** is what was on the page at review time; if it no\n' +
         'longer matches, stop and report the note instead of overwriting newer text.\n\n' : '') +
+      (list.some(n => n.style && n.style.length)
+        ? 'A note with **Style:** carries values the reviewer changed on the page and watched update, so\n' +
+          'the intent is exact. Before and after are computed values read off the browser. Apply the change\n' +
+          'where the style is authored and keep whatever the codebase already uses — do not replace\n' +
+          '`var(--space-4)` or `1rem` with a pixel value just because this file shows pixels.\n\n'
+        : '') +
       (list.some(n => n.region)
         ? 'A note with **Region:** is about an area the reviewer drew a box around, not a single element.\n' +
           '**Inside:** is the element that contains the box and **Covers:** lists what falls in it. Judge\n' +
@@ -953,6 +1078,13 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         if (n.edit) {
           m += '**Current' + (n.edit.a ? ' @' + n.edit.a : '') + ':** ' + code(n.edit.from) + '\n'
           m += '**Change to:** ' + code(n.edit.to) + '\n'
+        }
+        if (n.style && n.style.length) {
+          m += '**Style:**\n'
+          n.style.forEach(function (t2) {
+            m += '  - `' + t2.p + '`: ' + code(t2.from) + ' → ' + code(t2.to) +
+              (t2.tc ? ' (resolves to ' + code(t2.tc) + ')' : '') + '\n'
+          })
         }
         if (n.note) m += '**Note:**\n' + quote(n.note) + '\n'
         m += '\n'
@@ -1034,6 +1166,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       if (n.stext) o.x = n.stext
       if (n.edit) o.e = [n.edit.a || '', n.edit.from, n.edit.to]
       if (n.multi) o.m = n.multi
+      if (n.style && n.style.length) o.y = n.style.map(t2 => [t2.p, t2.from, t2.to, t2.tc || ''])
       if (n.region) o.g = [n.region.x, n.region.y, n.region.w, n.region.h]
       if (n.over && n.over.length) o.o = n.over
       // n.src is left out deliberately: a local file path is nobody else's business
@@ -1076,6 +1209,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
           stext: r.x, edit: r.e ? { a: r.e[0], from: r.e[1], to: r.e[2] } : null,
           multi: r.m, vw: vp().w, vh: vp().h,
           tag: r.g ? 'region' : '',
+          style: (r.y || []).map(a => ({ p: a[0], from: a[1], to: a[2], tc: a[3] || undefined })),
           region: r.g ? { x: r.g[0], y: r.g[1], w: r.g[2], h: r.g[3] } : null,
           over: r.o || null
         }
@@ -1103,6 +1237,10 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       var t = q(n.selector), st
       if (!t) { st = 'no'; missing++ }
       else if (n.edit) st = valOf(t, n.edit.a) === n.edit.to ? 'ok' : 'no'
+      else if (n.style && n.style.length) {
+        var cs3 = W.getComputedStyle(t)
+        st = n.style.every(t2 => cs3.getPropertyValue(t2.p) === (t2.tc || t2.to)) ? 'ok' : 'no'
+      }
       else st = txt(t) !== n.text ? 'ok' : 'no'
       if (st === 'ok') ok++
       return { n: n, el: t, st: st }
@@ -1203,9 +1341,10 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       if (active) render()
       return picked.length
     },
-    add: function (elOrSel, note, edit) {
+    // style is {'font-size': '24px', ...} — before values are read off the browser
+    add: function (elOrSel, note, edit, style) {
       var t = typeof elOrSel === 'string' ? (q(elOrSel) || D.querySelector(elOrSel)) : elOrSel
-      if (!t || (!note && !edit)) return null
+      if (!t || (!note && !edit && !style)) return null
       if (!active) { loadPrefs(); notes = load() }
       var n = {
         id: nid(), path: path(), url: url(), ts: Date.now(),
@@ -1214,10 +1353,26 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         vw: vp().w, vh: vp().h
       }
       if (edit) n.edit = { a: edit.a || '', from: valOf(t, edit.a || ''), to: edit.to }
+      if (style && W.getComputedStyle) {
+        var cs4 = W.getComputedStyle(t)
+        var arr = Object.keys(style)
+          .map(k => ({ p: k, from: cs4.getPropertyValue(k), to: String(style[k]) }))
+          .filter(x => x.to && x.to !== x.from)
+        if (arr.length) {
+          var got = applyPreview(t, arr)          // ask the browser what it resolves to
+          arr.forEach(function (x) {
+            if (got[x.p] && got[x.p] !== x.to && got[x.p] !== x.from) x.tc = got[x.p]
+          })
+          dropPreview()
+          n.style = arr
+        }
+      }
+      if (!note && !edit && !n.style) return null
       if (picked.length > 1) { n.multi = picked.slice(1).map(sel); picked = [] }
       withSrc(n, t)
       notes.push(n); save(); if (active) render()
-      emit('note', { here: here().length, total: notes.length, edit: !!edit, multi: (n.multi || []).length, source: !!n.src })
+      emit('note', { here: here().length, total: notes.length, edit: !!edit,
+        style: (n.style || []).length, multi: (n.multi || []).length, source: !!n.src })
       return Object.assign({}, n)
     },
     // {x, y, w, h} in viewport space, the same frame getBoundingClientRect uses

@@ -2,7 +2,7 @@
 
 **Click. Comment. Feed to AI.**
 
-Ultra-lightweight (14KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
+Ultra-lightweight (15KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
 
 ![Tack: click an element, rewrite its text, copy the review for your agent](https://gettack.dev/demo.gif)
 
@@ -46,6 +46,20 @@ Click a text element and its current text is already in the edit box. Change it,
 ```
 
 Works on `alt`, `placeholder`, `title`, `aria-label`, `href` and `value` too. The export tells the model to apply these verbatim, and to stop if the current text no longer matches what you saw.
+
+## Adjust styles
+
+Open `◨ Style` on an element and change its size, line height, weight, colour, background, padding, gap or radius. The page updates as you type; save, and it goes back to how it was. The note carries the before and after, not the change.
+
+```markdown
+**Style:**
+  - `font-size`: `17px` → `27px`
+  - `color`: `rgb(102, 102, 102)` → `rgb(17, 17, 17)`
+```
+
+Values are the browser's computed styles, so the note is exact and the applied check can verify it properly. The export tells your agent to apply the change where the style is authored and keep whatever the codebase already uses — `16px → 24px` must not turn `var(--space-4)` into a pixel literal.
+
+The preview is a paused Web Animation held at its last frame: it beats the author cascade and inline styles, reaches into open shadow roots, and leaves no attribute or inline style behind. It cannot beat `!important` — the row says so rather than pretending, and the note still records what you asked for.
 
 ## Share a review as a link
 
@@ -121,10 +135,10 @@ Selectors break on the first refactor; element text usually survives. Telling th
 
 ## Features
 
-- 📦 **14KB gzipped** — zero dependencies, vanilla JS
+- 📦 **15KB gzipped** — zero dependencies, vanilla JS
 - 🔒 **Local-only** — no data leaves your browser (localStorage)
 - 👻 **Dormant until needed** — activate with `#tack`
-- 🖐 **Never mutates your elements** — the UI is one shadow-root container on `<body>`; marks are drawn over the page, so `<img>`, inputs, SVG and tables are untouched and your layout never shifts
+- 🖐 **Never rewrites your elements** — the UI is one shadow-root container on `<body>`; marks are drawn over the page, so `<img>`, inputs, SVG and tables are untouched. Freeze and style preview change how the page looks while on, and revert when off
 - ✏️ **Rewrite text and attributes** in place instead of describing the change
 - 🔗 **Share a review as a link** — no server, no account
 - ✅ **Verify what was applied** after the agent runs
@@ -158,6 +172,7 @@ __tack.on()                          // activate without the #tack hash
 __tack.add('#hero h1', 'note')       // annotate by selector or element
 __tack.add('#sub', '', {to: 'New copy'})       // propose exact replacement text
 __tack.add('#img', '', {a: 'alt', to: 'Alt'})  // …or an attribute value
+__tack.add('#h', '', null, {'font-size': '24px'})  // …or a style
 __tack.menu()                        // open the actions menu
 __tack.open('#hero h1', {edit: 1})   // open the editor on an element
 __tack.select(['#a', '#b'])          // stage a multi-element selection
@@ -187,7 +202,7 @@ addEventListener('tack:export', e => {
 | Event | `event.detail` |
 |---|---|
 | `tack:activate` | `{notes}` — switched on, with this many notes already on the page |
-| `tack:note` | `{here, total, edit, multi, region, source}` — a note was saved; `edit` for a rewrite, `region` for an area, `source` when a file hint was found |
+| `tack:note` | `{here, total, edit, style, multi, region, source}` — a note was saved; `edit` for a rewrite, `style` counts adjusted properties, `region` for an area, `source` when a file hint was found |
 | `tack:export` | `{notes, all}` — Copy for AI handed the notes over and cleared them |
 | `tack:download` | `{notes, all}` — saved as a `.md` file |
 | `tack:share` | `{notes, chars}` — a review link was produced |
@@ -235,7 +250,7 @@ npm run dev       # landing page
 | Build step | None | Required | None | None |
 | Pages you don't own | ✓ (bookmarklet) | ✗ | ✗ localhost only | ✓ |
 | Ship to production | ✓ dormant | ✗ dev-only | ✗ | ✗ |
-| Size (gzip) | 14 KB | 115 KB | Extension + server | Extension |
+| Size (gzip) | 15 KB | 115 KB | Extension + server | Extension |
 | License | MIT | PolyForm Shield | MIT | Custom |
 | Agent sync loop (MCP) | ✗ not yet | ✓ | ✓ | ✗ |
 | Component source file | ✗ | ✓ React | ✓ React/Vue | ✗ |

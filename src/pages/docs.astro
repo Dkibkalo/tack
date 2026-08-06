@@ -21,6 +21,7 @@ const api = [
   ['__tack.add(el, note)', 'Annotate an element or CSS selector. Returns the note.'],
   ['__tack.add(el, "", {to})', 'Propose exact replacement text instead of a comment.'],
   ['__tack.add(el, "", {a, to})', 'Same, for an attribute: {a: "alt", to: "New alt"}.'],
+  ['__tack.add(el, note, null, {…})', 'Propose styles: {"font-size": "24px", color: "#111"}.'],
   ['__tack.open(el, {edit})', 'Open the editor on an element for a human to fill in.'],
   ['__tack.menu()', 'Open the actions menu.'],
   ['__tack.select([a, b])', 'Stage a multi-element selection for the next note.'],
@@ -45,7 +46,7 @@ const sources = [
 
 const events = [
   ['tack:activate', '{notes} — Tack was switched on, with this many notes already on the page.'],
-  ['tack:note', '{here, total, edit, multi, region, source} — a note was saved. edit is true for a rewrite, region for an area note, source when a file hint was found.'],
+  ['tack:note', '{here, total, edit, style, multi, region, source} — a note was saved. edit is true for a rewrite, style counts adjusted properties, region marks an area note, source is set when a file hint was found.'],
   ['tack:export', '{notes, all} — Copy for AI handed the notes over and cleared them.'],
   ['tack:download', '{notes, all} — the review was saved as a .md file.'],
   ['tack:share', '{notes, chars} — a review link was produced. chars is its full length.'],
@@ -103,6 +104,7 @@ const keys = [
       <a href="#activate">Activate</a>
       <a href="#notes">Notes</a>
       <a href="#rewrite">Rewrite text</a>
+      <a href="#style">Adjust styles</a>
       <a href="#multi">Multi-select</a>
       <a href="#region">Annotate an area</a>
       <a href="#source">Source hints</a>
@@ -120,7 +122,7 @@ const keys = [
     <p>One tag, before the closing <code>&lt;/body&gt;</code>. No build step, no npm dependency, no framework requirement.</p>
     <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack"&gt;&lt;/script&gt;</code></pre>
     <p>For anything you ship to real users, pin the version so a future release cannot change behaviour under you:</p>
-    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack@0.5.0"&gt;&lt;/script&gt;</code></pre>
+    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack@0.6.0"&gt;&lt;/script&gt;</code></pre>
     <p>Serious deployments should self-host the file instead of loading it from a CDN. It is one file with no dependencies — copy <code>tack.min.js</code> into your own assets.</p>
 
     <h3>Where the tag goes</h3>
@@ -152,6 +154,15 @@ const keys = [
 **Change to:** `Ship your first widget in five minutes.`</code></pre>
     <p>The same works for <code>alt</code>, <code>placeholder</code>, <code>title</code>, <code>aria-label</code>, <code>href</code> and <code>value</code>; pick the target in the dropdown when an element has several.</p>
     <p class="note">The export tells the agent to apply these verbatim, and to stop and report instead of overwriting if the current value no longer matches what you saw. That check matters when a review sits for a day before anyone acts on it.</p>
+
+    <h2 id="style">Adjust styles</h2>
+    <p>Open <code>◨ Style</code> on any element and change its size, line height, weight, colour, background, padding, gap or radius. The page updates as you type, so you are judging the real thing rather than imagining it. Save, and the page goes back to how it was — the note carries the before and after, not the change.</p>
+    <p>The values you see are the browser's computed styles, so the note is exact. The export tells your agent to apply the change where the style is authored and to keep whatever the codebase already uses: a note that reads <code>16px → 24px</code> must not turn <code>var(--space-4)</code> into a hard-coded pixel value.</p>
+    <p>Because the before and after are exact, style notes are checked properly by <a href="#verify">the applied pass</a>, the same way text rewrites are.</p>
+
+    <h3>How the preview avoids touching your element</h3>
+    <p>It is a paused Web Animation held at its final frame. That sits above the author cascade and above inline styles, reaches inside an open shadow root, and leaves nothing behind when it is cancelled — the element gains no attribute and no inline style, and any inline style it already had survives untouched.</p>
+    <p>One thing it cannot beat is <code>!important</code>. Rather than silently showing you nothing, the row says <code>locked by !important</code> and the note records what you asked for, so your agent knows the rule has to go.</p>
 
     <h2 id="multi">Multi-select</h2>
     <p>Shift-click several elements, or drag a box around them, then write one note for the group. The export lists every selector the note applies to under <code>**Also applies to:**</code>.</p>

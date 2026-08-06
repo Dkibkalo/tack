@@ -345,6 +345,57 @@
   ok('link carries no local paths', travelled.every(n => !n.src), JSON.stringify(travelled.map(n => n.src)))
   ok('the path is not in the link at all', srcLink.indexOf('proj') === -1 && !/src%2F|Hero/.test(srcLink))
 
+  // 19bb. style notes: propose a look, and leave the page exactly as it was
+  reset(); T.on()
+  var lead = document.getElementById('lead')
+  var wasSize = getComputedStyle(lead).fontSize
+  var sn = T.add('#lead', 'too small', null, { 'font-size': '31px', color: 'rgb(255, 0, 0)' })
+  ok('style note created', !!sn.style && sn.style.length === 2, JSON.stringify(sn.style))
+  ok('before value read off the browser', sn.style[0].from === wasSize, sn.style[0].from)
+  ok('after value recorded', sn.style[0].to === '31px', sn.style[0].to)
+
+  // the whole promise: previewing must leave nothing behind
+  ok('element keeps no inline style', lead.getAttribute('style') === null, lead.getAttribute('style'))
+  ok('page is back to how it was', getComputedStyle(lead).fontSize === wasSize, getComputedStyle(lead).fontSize)
+  ok('no stray attributes', lead.getAttributeNames().join(',') === 'id', lead.getAttributeNames().join(','))
+
+  ok('unchanged values are dropped', !T.add('#inp', '', null, { color: getComputedStyle(document.getElementById('inp')).color }))
+
+  // A rule the browser refuses to override must not be recorded as "resolved to the
+  // old value" — that would make the applied check pass on a change nobody made.
+  var lockEl = document.createElement('p')
+  lockEl.id = 'locked-probe'
+  lockEl.setAttribute('style', 'font-size:15px !important')
+  lockEl.textContent = 'locked'
+  document.body.appendChild(lockEl)
+  var ln = T.add('#locked-probe', 'bigger please', null, { 'font-size': '40px' })
+  ok('locked style still recorded as a request', ln.style[0].to === '40px', JSON.stringify(ln.style))
+  ok('locked style records no resolved value', ln.style[0].tc === undefined, JSON.stringify(ln.style))
+  await T.copy(false)
+  ok('locked style does not read as applied', T.applied().slice(-1)[0].status === 'no', JSON.stringify(T.applied()))
+  lockEl.remove()
+  reset(); T.on(); T.add('#lead', 'too small', null, { 'font-size': '31px', color: 'rgb(255, 0, 0)' })
+
+  var styMd = T.md(false)
+  ok('style lands in the export', /\*\*Style:\*\*/.test(styMd))
+  ok('style shows before and after', /`font-size`: `[^`]+` → `31px`/.test(styMd))
+  ok('style notes explained to the agent', /keep whatever the codebase already uses/.test(styMd))
+
+  // verification is exact for a style note, unlike a freeform one
+  await T.copy(false)
+  ok('style not applied yet', T.applied()[0].status === 'no')
+  lead.style.fontSize = '31px'; lead.style.color = 'rgb(255, 0, 0)'
+  ok('style seen once really applied', T.applied()[0].status === 'ok')
+  lead.removeAttribute('style')
+
+  reset(); T.on()
+  T.add('#lead', 'x', null, { 'font-size': '31px' })
+  var styLink = await T.link(false)
+  localStorage.clear(); T.off(); T.on()
+  await T.load(styLink)
+  var backStyle = T.list()[0].style
+  ok('style survives a link', backStyle && backStyle[0].to === '31px', JSON.stringify(backStyle))
+
   // 19c. region notes: a box that caught no element is still feedback
   reset(); T.on()
   var secBox = document.getElementById('srcsec').getBoundingClientRect()

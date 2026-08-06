@@ -2,7 +2,7 @@
 
 **Click. Comment. Feed to AI.**
 
-Ultra-lightweight (12KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
+Ultra-lightweight (14KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
 
 ![Tack: click an element, rewrite its text, copy the review for your agent](https://gettack.dev/demo.gif)
 
@@ -65,6 +65,26 @@ After your agent finishes, reload and pick `☰ → Check what was applied`. Tac
 
 Shift-click several elements, or drag a box around them, then write one note for the group ("these three cards should be equal height"). The export lists every selector the note applies to.
 
+## Annotate an area
+
+Not all feedback is about an element. Drag a box over whitespace, a gap, or a strip that feels cramped, and Tack records the area itself rather than doing nothing.
+
+The note carries the box in page coordinates, the deepest element containing it under `**Inside:**`, and what falls inside under `**Covers:**` — and the export tells the agent to work out which of those the note is really about. Region notes travel in a review link, and are skipped by the applied check because an area has no expected value to compare against.
+
+## Source hints
+
+Some dev servers stamp the source file onto the DOM. Where one is present Tack reads it and puts it above the selector as `**Source:**`:
+
+| Attribute | Emitted by |
+|---|---|
+| `data-astro-source-file` + `data-astro-source-loc` | Astro, automatically in dev |
+| `data-inspector-relative-path` + `-line` + `-column` | react-dev-inspector |
+| `data-v-inspector` | vite-plugin-vue-inspector |
+| `data-tsd-source` | TanStack Devtools |
+| `data-component-path` + `data-component-line` | Lovable-style tooling |
+
+Astro does this by default in development; React and Vue only with their inspector plugins installed, so expect it to be absent more often than present. It stays a hint — the export tells the agent to confirm the path exists before editing it. These paths can be absolute and carry a username, so they are kept out of review links.
+
 ## Bookmarklet
 
 For pages you don't control, use the bookmarklet from the [landing page](https://gettack.dev). Drag it to your bookmarks bar, click on any page. Sites with a strict `script-src` CSP will block it.
@@ -101,7 +121,7 @@ Selectors break on the first refactor; element text usually survives. Telling th
 
 ## Features
 
-- 📦 **12KB gzipped** — zero dependencies, vanilla JS
+- 📦 **14KB gzipped** — zero dependencies, vanilla JS
 - 🔒 **Local-only** — no data leaves your browser (localStorage)
 - 👻 **Dormant until needed** — activate with `#tack`
 - 🖐 **Never mutates your elements** — the UI is one shadow-root container on `<body>`; marks are drawn over the page, so `<img>`, inputs, SVG and tables are untouched and your layout never shifts
@@ -141,6 +161,7 @@ __tack.add('#img', '', {a: 'alt', to: 'Alt'})  // …or an attribute value
 __tack.menu()                        // open the actions menu
 __tack.open('#hero h1', {edit: 1})   // open the editor on an element
 __tack.select(['#a', '#b'])          // stage a multi-element selection
+__tack.region({x,y,w,h}, 'note')     // annotate an area, not an element
 __tack.list()                        // all notes as plain objects
 __tack.md(true)                      // markdown for every page (false = current page)
 __tack.copy(false)                   // copy current page's notes, then clear them
@@ -166,11 +187,11 @@ addEventListener('tack:export', e => {
 | Event | `event.detail` |
 |---|---|
 | `tack:activate` | `{notes}` — switched on, with this many notes already on the page |
-| `tack:note` | `{here, total, edit, multi}` — a note was saved; `edit` is true for a rewrite |
+| `tack:note` | `{here, total, edit, multi, region, source}` — a note was saved; `edit` for a rewrite, `region` for an area, `source` when a file hint was found |
 | `tack:export` | `{notes, all}` — Copy for AI handed the notes over and cleared them |
 | `tack:download` | `{notes, all}` — saved as a `.md` file |
 | `tack:share` | `{notes, chars}` — a review link was produced |
-| `tack:verify` | `{checked, applied, missing}` — the applied check ran |
+| `tack:verify` | `{checked, applied, missing, skipped}` — the applied check ran; `skipped` counts region notes |
 | `tack:import` | `{notes}` — a review link was opened and loaded |
 
 Payloads are counts and flags only — never note bodies, selectors or page text. A listener will often forward these somewhere, and nothing a reviewer typed should be able to leave that way.
@@ -214,7 +235,7 @@ npm run dev       # landing page
 | Build step | None | Required | None | None |
 | Pages you don't own | ✓ (bookmarklet) | ✗ | ✗ localhost only | ✓ |
 | Ship to production | ✓ dormant | ✗ dev-only | ✗ | ✗ |
-| Size (gzip) | 12 KB | 115 KB | Extension + server | Extension |
+| Size (gzip) | 14 KB | 115 KB | Extension + server | Extension |
 | License | MIT | PolyForm Shield | MIT | Custom |
 | Agent sync loop (MCP) | ✗ not yet | ✓ | ✓ | ✗ |
 | Component source file | ✗ | ✓ React | ✓ React/Vue | ✗ |

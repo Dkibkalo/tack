@@ -24,6 +24,7 @@ const api = [
   ['__tack.open(el, {edit})', 'Open the editor on an element for a human to fill in.'],
   ['__tack.menu()', 'Open the actions menu.'],
   ['__tack.select([a, b])', 'Stage a multi-element selection for the next note.'],
+  ['__tack.region({x,y,w,h}, note)', 'Annotate an area rather than an element. Viewport coordinates.'],
   ['__tack.list()', 'All notes as plain objects.'],
   ['__tack.md(all)', 'Markdown export. false = this page, true = every page.'],
   ['__tack.copy(all)', 'Copy the export to the clipboard, then clear those notes.'],
@@ -34,13 +35,21 @@ const api = [
   ['__tack.clear()', 'Delete every note.'],
 ]
 
+const sources = [
+  ['data-astro-source-file + data-astro-source-loc', 'Astro, automatically in dev'],
+  ['data-inspector-relative-path + -line + -column', 'react-dev-inspector'],
+  ['data-v-inspector', 'vite-plugin-vue-inspector'],
+  ['data-tsd-source', 'TanStack Devtools'],
+  ['data-component-path + data-component-line', 'Lovable-style tooling'],
+]
+
 const events = [
   ['tack:activate', '{notes} — Tack was switched on, with this many notes already on the page.'],
-  ['tack:note', '{here, total, edit, multi} — a note was saved. edit is true for a text rewrite.'],
+  ['tack:note', '{here, total, edit, multi, region, source} — a note was saved. edit is true for a rewrite, region for an area note, source when a file hint was found.'],
   ['tack:export', '{notes, all} — Copy for AI handed the notes over and cleared them.'],
   ['tack:download', '{notes, all} — the review was saved as a .md file.'],
   ['tack:share', '{notes, chars} — a review link was produced. chars is its full length.'],
-  ['tack:verify', '{checked, applied, missing} — the applied check ran against the last export.'],
+  ['tack:verify', '{checked, applied, missing, skipped} — the applied check ran. skipped counts region notes, which have no expected value.'],
   ['tack:import', '{notes} — a review link was opened and its notes loaded.'],
 ]
 
@@ -95,6 +104,8 @@ const keys = [
       <a href="#notes">Notes</a>
       <a href="#rewrite">Rewrite text</a>
       <a href="#multi">Multi-select</a>
+      <a href="#region">Annotate an area</a>
+      <a href="#source">Source hints</a>
       <a href="#share">Share a review</a>
       <a href="#verify">Verify</a>
       <a href="#export">Export format</a>
@@ -109,7 +120,7 @@ const keys = [
     <p>One tag, before the closing <code>&lt;/body&gt;</code>. No build step, no npm dependency, no framework requirement.</p>
     <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack"&gt;&lt;/script&gt;</code></pre>
     <p>For anything you ship to real users, pin the version so a future release cannot change behaviour under you:</p>
-    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack@0.3.5"&gt;&lt;/script&gt;</code></pre>
+    <pre><code>&lt;script src="https://unpkg.com/@kibkalo/tack@0.5.0"&gt;&lt;/script&gt;</code></pre>
     <p>Serious deployments should self-host the file instead of loading it from a CDN. It is one file with no dependencies — copy <code>tack.min.js</code> into your own assets.</p>
 
     <h3>Where the tag goes</h3>
@@ -145,6 +156,21 @@ const keys = [
     <h2 id="multi">Multi-select</h2>
     <p>Shift-click several elements, or drag a box around them, then write one note for the group. The export lists every selector the note applies to under <code>**Also applies to:**</code>.</p>
 
+    <h2 id="region">Annotate an area</h2>
+    <p>Not all feedback is about an element. Drag a box that lands on nothing in particular — whitespace, a gap between cards, a strip that feels cramped — and instead of doing nothing, Tack records the area itself.</p>
+    <p>The note carries the box in page coordinates, the deepest element that contains it under <code>**Inside:**</code>, and what falls inside it under <code>**Covers:**</code>. The export tells the agent to work out which of those the note is really about rather than assuming all of them. Below roughly 24×24 pixels a drag is treated as a slipped click and ignored.</p>
+    <p>Region notes travel in a review link like any other. They are skipped by the applied check: an area has no expected value, so there is nothing there that could honestly be called verified.</p>
+
+    <h2 id="source">Source hints</h2>
+    <p>Some dev servers stamp the file that rendered an element onto the DOM. When one is there, Tack reads it and puts it at the top of the note as <code>**Source:**</code>, ranked above the selector.</p>
+    <table>
+      <tbody>
+        {sources.map(([attr, who]) => (<tr><td><code>{attr}</code></td><td>{who}</td></tr>))}
+      </tbody>
+    </table>
+    <p>Astro emits these by default in development. React and Vue do it only when their inspector plugins are installed, so expect the hint to be missing more often than present — it costs nothing when it is. If the element has no stamp, Tack walks up a few ancestors and labels the result as coming from one.</p>
+    <p>It stays a hint. The value comes from the page, so the export tells the agent to confirm the path exists in the workspace before editing it and never to touch anything outside the workspace on the strength of it. These paths can be absolute and carry a username and directory layout, so they are deliberately left out of review links — local exports only.</p>
+
     <h2 id="share">Share a review as a link</h2>
     <p><code>☰ → Copy review link</code> compresses the whole review into the URL fragment:</p>
     <pre><code>https://acme.com/pricing#tack=zVY9b8IwEP0rlmdESttD…</code></pre>
@@ -154,6 +180,7 @@ const keys = [
     <h2 id="verify">Verify what was applied</h2>
     <p>Tack records what each annotated element looked like when you flagged it. After your agent has finished, reload and choose <code>☰ → Check what was applied</code>: changed elements go green, unchanged stay amber, missing ones are called out. Text rewrites are matched exactly against what you typed.</p>
     <p>It compares the last export, so run it after <code>Copy</code>, not before.</p>
+    <p>Know what the two kinds of note prove. A text or attribute rewrite is checked exactly: green means the value is now the string you asked for. A freeform note has no expected value to compare against, so green only means the element's text is no longer what it was — an unrelated edit turns it green too, and a CSS or layout fix leaves it amber even when the note was addressed. Treat freeform results as a prompt to look, not as proof.</p>
 
     <h2 id="export">Export format</h2>
     <p>The export is Markdown that explains to the model how to read itself. Each note carries three anchors, and the file states which to trust:</p>
@@ -216,6 +243,7 @@ __tack.off()</code></pre>
       <li>Designed for a desktop browser. On a phone or tablet the basics do work — tapping an element opens the note popup, and the toolbar, popups and markers are kept on screen and sized for a finger — but the parts that assume a pointer or a keyboard do not: no hover preview of the element you are about to pick, no drag-a-box multi-select, and no <code>↑</code>/<code>↓</code>, shift-click or <code>⌘↵</code>. Touch behaviour is verified in emulated Chrome, not on physical devices.</li>
       <li>Selectors are captured at review time and go stale when markup is restructured — which is exactly why the export ranks text above selectors.</li>
       <li>Notes are stored per browser and per origin. They do not sync between machines; use a review link for that.</li>
+      <li>The page you annotate can read your notes. Tack runs inside it, so that page's JavaScript can read <code>location.hash</code> before Tack clears it and can read <code>localStorage</code>, which is under the page's own origin. Irrelevant on your own site or localhost; it matters when you point the bookmarklet at a site you do not trust. See <a href="/privacy">privacy</a>.</li>
       <li>There is no agent sync loop yet: you copy the export into your agent, rather than the agent picking notes up on its own.</li>
     </ul>
 

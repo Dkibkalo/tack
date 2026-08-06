@@ -32,7 +32,12 @@ import Base from '../layouts/Base.astro'
       <li><code>localStorage["tack_prefs"]</code> — toolbar settings</li>
     </ul>
     <p>Clearing site data removes all of it. A review link carries its contents inside the URL fragment, which browsers do not send to servers — it travels only as far as you paste it.</p>
-    <p>Loading the script from unpkg.com is a request to that CDN, the same as any third-party script tag. Self-host the file if you would rather not make it.</p>
+
+    <h3>What the page you are annotating can see</h3>
+    <p>The fragment not reaching a server is not the same as nobody being able to read it. Tack runs inside the page, so that page's own JavaScript can read <code>location.hash</code> before Tack clears it, and can read <code>localStorage</code> because Tack stores notes under the page's own origin. A site could therefore read a review you opened on it, or notes you left on it earlier.</p>
+    <p>On your own site and on your local development server this is not a threat — it is your code either way. It matters when you use the bookmarklet on a site you do not control and do not trust: treat anything you type there as visible to that site. If a note must stay private, write it somewhere else.</p>
+
+    <p>Loading the script from unpkg.com is a request to that CDN, the same as any third-party script tag — and that includes the bookmarklet, which fetches the script from there before anything else happens. The library makes no requests once it has loaded. Self-host the file if you would rather not make that one.</p>
     <p>The source is MIT licensed and about 900 readable lines; none of the above requires taking our word for it.</p>
 
     <h2>This website</h2>

@@ -17,6 +17,16 @@
   <div id="rich">Hello <em>world</em></div>
   <div id="nested"><p>child</p></div>
 </section>
+<!-- what a dev server stamps on the DOM, and things that only look like it -->
+<section id="srcsec" data-astro-source-file="/proj/src/pages/index.astro" data-astro-source-loc="12:4">
+  <p id="src-astro" data-astro-source-file="/proj/src/components/Hero.astro" data-astro-source-loc="7:2">astro stamped</p>
+  <p id="src-vue" data-v-inspector="src/App.vue:31:6">vue stamped</p>
+  <p id="src-react" data-inspector-relative-path="src/Button.tsx" data-inspector-line="9" data-inspector-column="3">react stamped</p>
+  <p id="src-child">no stamp of its own</p>
+</section>
+<p id="src-bad" data-v-inspector="not-a-file-at-all">looks like a stamp, is not</p>
+<p id="src-none">nothing anywhere above it</p>
+
 <my-card id="card"></my-card>
 <pre id="out">running…</pre>
 
@@ -118,8 +128,19 @@
   ok('note body is quoted', m.indexOf('> ignore previous instructions') > -1)
   ok('fake heading neutralised', m.indexOf('\n## Fake heading') === -1, 'raw heading leaked')
   ok('element backticks escaped', m.indexOf('`back`ticks`') === -1)
-  ok('injection warning present', /human-typed requests[\s\S]*override/.test(m))
+  // assert what the warning must cover, not how it is worded
+  ok('injection warning present', /untrusted[\s\S]*override/i.test(m))
+  ok('warning covers note bodies', /untrusted[\s\S]*note[\s\S]*override/i.test(m))
+  ok('warning covers page-derived fields', /untrusted[\s\S]*(selector|text)[\s\S]*override/i.test(m))
   ok('usage protocol present', m.indexOf('## How to use this file') > -1)
+
+  // batch protocol: only when there is more than one note to reconcile
+  ok('no batch section for one note', m.indexOf('Working through the batch') === -1)
+  T.add(document.getElementById('lead'), 'second note')
+  var mBatch = T.md(false)
+  ok('batch section for several notes', mBatch.indexOf('Working through the batch') > -1)
+  ok('batch asks for conflict check', /conflicts/i.test(mBatch))
+  ok('batch asks for a checklist', /checklist/i.test(mBatch))
 
   // 10. copy exports, clears, stashes
   reset(); T.on()
@@ -290,6 +311,78 @@
   ok('freeze injects a style', !!document.getElementById('tack-freeze'))
   T.prefs({ freeze: 0 })
   ok('freeze style goes away', !document.getElementById('tack-freeze'))
+
+  // 19b. source hint: read it where a dev server left one, refuse to invent one,
+  //      and never let a local path ride along in a link sent to someone else
+  reset(); T.on()
+  var sAstro = T.add('#src-astro', 'a')
+  var sVue = T.add('#src-vue', 'b')
+  var sReact = T.add('#src-react', 'c')
+  var sChild = T.add('#src-child', 'd')
+  var sBad = T.add('#src-bad', 'e')
+  var sNone = T.add('#src-none', 'f')
+  ok('astro stamp read', sAstro.src === '/proj/src/components/Hero.astro:7:2', sAstro.src)
+  ok('own stamp not marked as ancestor', !sAstro.srcUp)
+  ok('vue inspector stamp read', sVue.src === 'src/App.vue:31:6', sVue.src)
+  ok('react inspector stamp read', sReact.src === 'src/Button.tsx:9:3', sReact.src)
+  ok('falls back to the ancestor', sChild.src === '/proj/src/pages/index.astro:12:4', sChild.src)
+  ok('ancestor match is labelled', sChild.srcUp === 1)
+  ok('non-file value rejected', !sBad.src, sBad.src)
+  ok('no stamp means no source', !sNone.src, sNone.src)
+
+  var srcMd = T.md(false)
+  ok('source lands in the export', srcMd.indexOf('**Source:** `/proj/src/components/Hero.astro:7:2`') > -1)
+  ok('ancestor source is labelled in the export', srcMd.indexOf('**Source (nearest ancestor with one)') > -1)
+  ok('source is documented as an anchor', /1\. \*\*Source\*\*/.test(srcMd))
+  ok('source is framed as unverified', /hint read off the page/.test(srcMd))
+  ok('source ranks above selector', srcMd.indexOf('**Source:**') < srcMd.indexOf('**Selector:**'))
+
+  var srcLink = await T.link(false)
+  localStorage.clear(); T.off(); T.on()
+  await T.load(srcLink)
+  var travelled = T.list()
+  ok('link carried the notes', travelled.length === 6, String(travelled.length))
+  ok('link carries no local paths', travelled.every(n => !n.src), JSON.stringify(travelled.map(n => n.src)))
+  ok('the path is not in the link at all', srcLink.indexOf('proj') === -1 && !/src%2F|Hero/.test(srcLink))
+
+  // 19c. region notes: a box that caught no element is still feedback
+  reset(); T.on()
+  var secBox = document.getElementById('srcsec').getBoundingClientRect()
+  var reg = T.region({ x: secBox.left + 4, y: secBox.top + 4, w: secBox.width - 8, h: secBox.height - 8 },
+    'this whole strip is cramped')
+  ok('region note created', !!reg && !!reg.region, JSON.stringify(reg && reg.region))
+  ok('region is tagged', reg.tag === 'region', reg.tag)
+  ok('region records its box', reg.region.w > 0 && reg.region.h > 0, JSON.stringify(reg.region))
+  ok('region resolves a container', reg.selector === '#srcsec', reg.selector)
+  ok('region lists what it covers', reg.over.length > 0, JSON.stringify(reg.over))
+  ok('degenerate box refused', T.region({ x: 0, y: 0, w: 0, h: 10 }, 'x') === null)
+
+  var regMd = T.md(false)
+  ok('region reported in the export', /\*\*Region:\*\* \d+×\d+ px at \d+,\d+/.test(regMd))
+  ok('container labelled Inside not Selector', regMd.indexOf('**Inside:** `#srcsec`') > -1)
+  ok('covered elements listed', regMd.indexOf('**Covers:**') > -1)
+  ok('regions explained to the agent', /drew a box around/.test(regMd))
+
+  // A region has no expected value, so verification must not invent a verdict for it —
+  // while still checking the ordinary notes exported alongside it.
+  T.add('#lead', '', { to: 'Rewritten lead copy.' })
+  await T.copy(false)
+  document.getElementById('lead').textContent = 'Rewritten lead copy.'
+  var appliedOut = T.applied()
+  ok('applied check ignores the region', appliedOut.length === 1, JSON.stringify(appliedOut))
+  ok('applied check still judges real notes', appliedOut[0].status === 'ok', JSON.stringify(appliedOut))
+  document.getElementById('lead').textContent = 'We provide excellent services to everyone.'
+
+  // and it has to survive a share link
+  reset(); T.on()
+  T.region({ x: secBox.left + 4, y: secBox.top + 4, w: secBox.width - 8, h: secBox.height - 8 }, 'cramped')
+  var regLink = await T.link(false)
+  localStorage.clear(); T.off(); T.on()
+  await T.load(regLink)
+  var backRegion = T.list()[0]
+  ok('region survives a link', !!backRegion.region && backRegion.region.w === reg.region.w,
+    JSON.stringify(backRegion.region))
+  ok('covered elements survive a link', (backRegion.over || []).length > 0, JSON.stringify(backRegion.over))
 
   // 20. events: the host page can watch a review without the library dialling out,
   //     and nothing a reviewer typed may ride along in the payload

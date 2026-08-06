@@ -2,7 +2,7 @@
 
 **Click. Comment. Feed to AI.**
 
-Ultra-lightweight (11KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
+Ultra-lightweight (12KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
 
 ![Tack: click an element, rewrite its text, copy the review for your agent](https://gettack.dev/demo.gif)
 
@@ -101,7 +101,7 @@ Selectors break on the first refactor; element text usually survives. Telling th
 
 ## Features
 
-- 📦 **11KB gzipped** — zero dependencies, vanilla JS
+- 📦 **12KB gzipped** — zero dependencies, vanilla JS
 - 🔒 **Local-only** — no data leaves your browser (localStorage)
 - 👻 **Dormant until needed** — activate with `#tack`
 - 🖐 **Never mutates your elements** — the UI is one shadow-root container on `<body>`; marks are drawn over the page, so `<img>`, inputs, SVG and tables are untouched and your layout never shifts
@@ -109,6 +109,7 @@ Selectors break on the first refactor; element text usually survives. Telling th
 - 🔗 **Share a review as a link** — no server, no account
 - ✅ **Verify what was applied** after the agent runs
 - 🌓 **Shadow DOM & SPA aware** — selectors cross open shadow roots (` >>> `), pins survive `pushState` navigation
+- 📱 **Stays on the screen** — the toolbar and popups are pinned to the visible viewport, not the layout viewport, so they remain reachable on a phone even when the host page is wider than the device
 - ✍️ **Text selection** — select a phrase to annotate exactly that
 - 🎯 **Multi-select** — shift-click or drag a box, one note for many elements
 - ⏸ **Freeze animations** so you can annotate a specific frame
@@ -191,7 +192,7 @@ npm run dev       # landing page
 | Build step | None | Required | Required | n/a |
 | Pages you don't own | ✓ (bookmarklet) | ✗ | ✗ localhost only | ✓ |
 | Ship to production | ✓ dormant | ✗ dev-only | ✗ | ✗ |
-| Size (gzip) | 11 KB | 115 KB | Extension + server | Extension |
+| Size (gzip) | 12 KB | 115 KB | Extension + server | Extension |
 | License | MIT | PolyForm Shield | MIT | Custom |
 | Agent sync loop (MCP) | ✗ not yet | ✓ | ✓ | ✗ |
 | React source file + line | ✗ | ✓ | ✗ | ✗ |

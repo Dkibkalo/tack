@@ -8,7 +8,7 @@
   var catcher, label, frozenAnims = [], frozenMedia = []
   var INLINE = /^(B|I|EM|STRONG|SPAN|A|CODE|BR|SMALL|U|MARK|SUP|SUB)$/
   var ATTRS = ['alt', 'placeholder', 'title', 'aria-label', 'href', 'value']
-  var VER = '0.3.5', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
+  var VER = '0.4.0', SITE = 'https://gettack.dev'   // VER is checked against package.json by the test runner
 
   function path () { return location.pathname + location.search }
   function url () { return (location.origin && location.origin !== 'null' ? location.origin : '') + path() }
@@ -115,13 +115,24 @@
   function valOf (el, a) { return a ? (el.getAttribute(a) || '') : rawtxt(el) }
 
   // --- UI shell ---
+  //
+  // --vr/--vb/--vcx/--vvw/--vvh say where the screen actually is. A page whose
+  // content is wider than the phone gets a layout viewport wider than the phone,
+  // and position:fixed resolves against that rather than against what you can
+  // see — so corner-anchored UI lands outside the screen. frame() measures the
+  // gap and writes it here. The defaults are the no-gap case, which is every
+  // ordinary page, so none of this costs anything there.
+  //
+  // The (pointer:coarse) block near the bottom grows the controls for a finger
+  // and leaves the desktop toolbar compact.
   var CSS_ = `
 :host{all:initial;position:fixed;inset:0;z-index:2147483647;pointer-events:none;font-family:system-ui,sans-serif;
---bg:#1e293b;--fg:#e2e8f0;--mut:#94a3b8;--bd:#334155;--in:#0f172a;--ac:#f59e0b;--sh:0 8px 32px rgba(0,0,0,.4)}
+--bg:#1e293b;--fg:#e2e8f0;--mut:#94a3b8;--bd:#334155;--in:#0f172a;--ac:#f59e0b;--sh:0 8px 32px rgba(0,0,0,.4);
+--vr:0px;--vb:0px;--vcx:50%;--vvw:100vw;--vvh:100vh}
 :host(.lt){--bg:#fff;--fg:#0f172a;--mut:#64748b;--bd:#e2e8f0;--in:#f8fafc;--sh:0 8px 32px rgba(0,0,0,.14)}
 button{font:inherit;cursor:pointer;border:0}
 .cat{position:fixed;inset:0;pointer-events:auto;cursor:crosshair}
-.pill{pointer-events:auto;position:fixed;right:16px;bottom:16px;display:flex;align-items:center;gap:6px;
+.pill{pointer-events:auto;position:fixed;right:calc(16px + var(--vr));bottom:calc(16px + var(--vb));display:flex;align-items:center;gap:6px;
 background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:999px;padding:6px 8px;box-shadow:var(--sh);font-size:13px}
 .pill .lg{color:var(--ac);padding-left:6px;text-decoration:none;cursor:pointer;line-height:1}
 .pill .lg:hover{filter:brightness(1.25)} .pill .ct{color:var(--mut);font-size:12px;padding-right:2px}
@@ -129,10 +140,10 @@ background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:99
 .pill button:hover{background:rgba(127,127,127,.18);color:var(--fg)}
 .pill .go{background:#2563eb;color:#fff;padding:5px 12px} .pill .go:hover{background:#1d4ed8;color:#fff}
 .pill .tog{font-size:15px;padding:4px 8px}
-.mini{pointer-events:auto;position:fixed;right:16px;bottom:16px;width:42px;height:42px;border-radius:999px;
+.mini{pointer-events:auto;position:fixed;right:calc(16px + var(--vr));bottom:calc(16px + var(--vb));width:42px;height:42px;border-radius:999px;
 background:var(--bg);border:1px solid var(--bd);box-shadow:var(--sh);font-size:17px;color:var(--fg)}
 .mini .bd{position:absolute;top:-4px;right:-4px;background:var(--ac);color:#111;border-radius:999px;font:600 10px system-ui;padding:1px 5px}
-.pop{pointer-events:auto;position:fixed;width:320px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);
+.pop{pointer-events:auto;position:fixed;width:min(320px,calc(var(--vvw) - 24px));background:var(--bg);color:var(--fg);border:1px solid var(--bd);
 border-radius:10px;box-shadow:var(--sh);overflow:hidden}
 .hd{display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(127,127,127,.09);cursor:move;font:12px system-ui;color:var(--mut)}
 .hd .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -150,8 +161,8 @@ border-radius:6px;padding:6px 8px;margin-bottom:6px;max-height:54px;overflow:aut
 .row{display:flex;gap:6px;margin-top:8px;align-items:center} .row .f{flex:1}
 .row button{padding:5px 12px;border-radius:6px;font:12px system-ui;color:#fff}
 .sv{background:#2563eb} .cn{background:#475569} .dl{background:#dc2626}
-.menu{pointer-events:auto;position:fixed;right:16px;bottom:66px;background:var(--bg);border:1px solid var(--bd);
-border-radius:10px;padding:4px;box-shadow:var(--sh);min-width:210px;max-height:60vh;overflow:auto}
+.menu{pointer-events:auto;position:fixed;right:calc(16px + var(--vr));bottom:calc(66px + var(--vb));background:var(--bg);border:1px solid var(--bd);
+border-radius:10px;padding:4px;box-shadow:var(--sh);min-width:210px;max-height:min(60vh,calc(var(--vvh) - 120px));overflow:auto}
 .menu button{display:block;width:100%;text-align:left;background:none;color:var(--fg);padding:7px 10px;border-radius:6px;font:13px system-ui}
 .menu button:hover{background:rgba(127,127,127,.15)} .menu button:disabled{color:var(--mut);opacity:.55;cursor:default}
 .menu .sep{height:1px;background:var(--bd);margin:4px 0}
@@ -172,11 +183,18 @@ border-radius:999px;min-width:19px;height:19px;font:600 11px/19px system-ui;text
 .lb{position:fixed;pointer-events:none;background:#0f172a;color:#e2e8f0;border-radius:5px;padding:3px 7px;
 font:11px ui-monospace,monospace;box-shadow:0 2px 8px rgba(0,0,0,.4);white-space:nowrap;z-index:3}
 .bnd{position:fixed;border:1px solid #3b82f6;background:rgba(59,130,246,.12);pointer-events:none}
-.chip{pointer-events:auto;position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#2563eb;color:#fff;
+.chip{pointer-events:auto;position:fixed;left:var(--vcx);bottom:calc(70px + var(--vb));transform:translateX(-50%);background:#2563eb;color:#fff;
 border-radius:999px;padding:6px 14px;font:13px system-ui;box-shadow:var(--sh)}
-.tst{pointer-events:auto;position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:var(--bg);color:var(--fg);
-border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box-shadow:var(--sh)}
-.tst a{color:#60a5fa;margin-left:8px;cursor:pointer}`
+.tst{pointer-events:auto;position:fixed;left:var(--vcx);bottom:calc(16px + var(--vb));transform:translateX(-50%);background:var(--bg);color:var(--fg);
+border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box-shadow:var(--sh);max-width:calc(var(--vvw) - 24px)}
+.tst a{color:#60a5fa;margin-left:8px;cursor:pointer}
+@media (pointer:coarse){
+.pill{padding:8px 10px} .pill button{padding:9px 12px} .pill .go{padding:9px 14px}
+.pill .tog{padding:8px 10px} .tabs button{padding:8px 12px} .row button{padding:9px 14px}
+.menu button{padding:11px 10px} .menu label{padding:10px}
+.hd button{padding:6px 8px} .mini{width:52px;height:52px}
+.mk::after{content:'';position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+}`
 
   function build () {
     host = D.createElement('div'); host.id = 'tack-host'
@@ -191,7 +209,47 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     label = D.createElement('div'); label.className = 'lb'; label.style.display = 'none'
     shadow.appendChild(label)
     D.body.appendChild(host)
+    frame()
     updBar()
+  }
+
+  /**
+   * The box a fixed element can be placed in and still be seen, in the same
+   * coordinate space as getBoundingClientRect().
+   *
+   * The host is `position:fixed; inset:0`, so its rect IS the fixed containing
+   * block — no probe element, and nothing appended to the page to find out.
+   * visualViewport describes the part of that block the user is looking at, in
+   * the same units. On an ordinary page the two coincide and this is a no-op;
+   * where they differ (a page wider than the screen, pinch zoom, or a software
+   * keyboard eating the bottom) it is the difference between visible and gone.
+   */
+  function vbox () {
+    var r = host ? host.getBoundingClientRect() : null      // one layout read per call
+    if (!r || !r.width) {
+      var e = D.documentElement
+      return { l: 0, t: 0, r: e.clientWidth, b: e.clientHeight, w: e.clientWidth, h: e.clientHeight,
+               fr: e.clientWidth, fb: e.clientHeight }
+    }
+    var v = W.visualViewport
+    var l = r.left + (v ? v.offsetLeft : 0)
+    var t = r.top + (v ? v.offsetTop : 0)
+    var w = v ? v.width : r.width
+    var h = v ? v.height : r.height
+    // fr/fb are the far edges of the fixed containing block, which is what
+    // `right:`/`bottom:` count back from. The gap to r/b is what has to be added.
+    return { l: l, t: t, r: l + w, b: t + h, w: w, h: h, fr: r.right, fb: r.bottom }
+  }
+  /** The screen the reviewer was actually looking at, for the export header. */
+  function vp () { var v = vbox(); return { w: Math.round(v.w), h: Math.round(v.h) } }
+  function frame () {
+    if (!host) return
+    var b = vbox(), s = host.style
+    s.setProperty('--vr', Math.max(0, b.fr - b.r) + 'px')
+    s.setProperty('--vb', Math.max(0, b.fb - b.b) + 'px')
+    s.setProperty('--vcx', (b.l + b.w / 2) + 'px')
+    s.setProperty('--vvw', b.w + 'px')
+    s.setProperty('--vvh', b.h + 'px')
   }
   function el (tag, cls2, txt2) {
     var e = D.createElement(tag); if (cls2) e.className = cls2
@@ -391,23 +449,24 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     if (opts.note) ta.setSelectionRange(opts.note.length, opts.note.length)
   }
 
-  // Never cover the element being annotated.
+  // Never cover the element being annotated, and never leave the screen.
   function place (p, r) {
-    var vw = W.innerWidth, vh = W.innerHeight
+    var v = vbox()
+    var x0 = v.l + 12, y0 = v.t + 12, x1 = v.r - 12, y1 = v.b - 12
     var pw = p.offsetWidth || 320, ph = p.offsetHeight || 210
-    var left = Math.min(r.left, vw - pw - 12), top = r.bottom + 8
-    if (top + ph > vh - 12) {
+    var left = Math.min(r.left, x1 - pw), top = r.bottom + 8
+    if (top + ph > y1) {
       var above = r.top - ph - 8
-      if (above > 12) top = above
+      if (above > y0) top = above
       else {
-        top = Math.max(12, Math.min(r.top, vh - ph - 12))
+        top = Math.max(y0, Math.min(r.top, y1 - ph))
         left = r.right + 8
-        if (left + pw > vw - 12) left = r.left - pw - 8
-        if (left < 12) { left = Math.min(r.left, vw - pw - 12); top = Math.max(12, vh - ph - 12) }
+        if (left + pw > x1) left = r.left - pw - 8
+        if (left < x0) { left = Math.min(r.left, x1 - pw); top = Math.max(y0, y1 - ph) }
       }
     }
-    p.style.left = Math.max(12, left) + 'px'
-    p.style.top = Math.max(12, top) + 'px'
+    p.style.left = Math.max(x0, left) + 'px'
+    p.style.top = Math.max(y0, top) + 'px'
   }
   function drag (p, handle) {
     handle.addEventListener('mousedown', function (e) {
@@ -415,8 +474,9 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       e.preventDefault()
       var r = p.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top
       function mv (ev) {
-        p.style.left = Math.max(0, Math.min(ev.clientX - dx, W.innerWidth - r.width)) + 'px'
-        p.style.top = Math.max(0, Math.min(ev.clientY - dy, W.innerHeight - 40)) + 'px'
+        var v = vbox()
+        p.style.left = Math.max(v.l, Math.min(ev.clientX - dx, v.r - r.width)) + 'px'
+        p.style.top = Math.max(v.t, Math.min(ev.clientY - dy, v.b - 40)) + 'px'
       }
       function up () { W.removeEventListener('mousemove', mv, true); W.removeEventListener('mouseup', up, true) }
       W.addEventListener('mousemove', mv, true); W.addEventListener('mouseup', up, true)
@@ -499,10 +559,11 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         p.hl.style.display = 'none'; if (p.mk) p.mk.style.display = 'none'; return
       }
       p.hl.style.cssText = 'display:block;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px'
-      if (p.mk) p.mk.style.cssText = 'display:block;left:' + Math.min(r.right, W.innerWidth - 14) + 'px;top:' + Math.max(r.top, 12) + 'px'
+      var vb = vbox()
+      if (p.mk) p.mk.style.cssText = 'display:block;left:' + Math.min(r.right, vb.r - 14) + 'px;top:' + Math.max(r.top, vb.t + 12) + 'px'
     })
   }
-  function onScroll () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; layout() }) }
+  function onScroll () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; frame(); layout() }) }
 
   function chip () {
     gone('.chip')
@@ -543,8 +604,9 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     label.textContent = name(hoverEl) + ' · ' + Math.round(r.width) + '×' + Math.round(r.height) + (sticky ? ' · ↑↓ to move' : '')
     label.style.display = 'block'
     var lx = e ? e.clientX + 12 : r.left, ly = e ? e.clientY + 16 : r.top - 22
-    label.style.left = Math.min(lx, W.innerWidth - label.offsetWidth - 8) + 'px'
-    label.style.top = Math.min(ly, W.innerHeight - 30) + 'px'
+    var vb = vbox()
+    label.style.left = Math.max(vb.l, Math.min(lx, vb.r - label.offsetWidth - 8)) + 'px'
+    label.style.top = Math.max(vb.t, Math.min(ly, vb.b - 30)) + 'px'
   }
   function clearHover () { var hv = shadow && shadow.querySelector('.hv'); if (hv) hv.remove(); if (label) label.style.display = 'none' }
 
@@ -600,7 +662,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
           id: nid(), path: path(), url: url(), ts: Date.now(),
           selector: sel(target), heading: heading(target), text: txt(target), note: note,
           tag: target.tagName.toLowerCase(), cls: cls(target), role: role(target),
-          vw: W.innerWidth, vh: W.innerHeight
+          vw: vp().w, vh: vp().h
         }
         if (stext) n.stext = stext
         if (edit) n.edit = edit
@@ -688,7 +750,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     if (multiP) where = where.replace(/^(\w+:\/\/[^\/]+).*/, '$1')
     var anyEdit = list.some(n => n.edit)
     var m = '# Tack review — ' + list.length + ' note' + (list.length !== 1 ? 's' : '') + '\n' +
-      where + ' · viewport ' + (ref.vw || W.innerWidth) + '×' + (ref.vh || W.innerHeight) +
+      where + ' · viewport ' + (ref.vw || vp().w) + '×' + (ref.vh || vp().h) +
       ' · ' + new Date().toISOString().slice(0, 10) + '\n\n' +
       '## How to use this file\n' +
       'Anchors per note, most reliable first:\n' +
@@ -838,7 +900,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
           id: nid(), path: r.p || path(), url: url(), ts: Date.now(),
           selector: r.s, heading: r.h || '', text: r.t || '', note: r.c || '',
           stext: r.x, edit: r.e ? { a: r.e[0], from: r.e[1], to: r.e[2] } : null,
-          multi: r.m, vw: W.innerWidth, vh: W.innerHeight
+          multi: r.m, vw: vp().w, vh: vp().h
         }
       })
       notes = notes.concat(add); save(); render()
@@ -893,6 +955,12 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     W.addEventListener('resize', onScroll)
     W.addEventListener('popstate', nav)
     W.addEventListener('storage', onStore)
+    // Pinch zoom and the software keyboard move the screen without moving the
+    // page, so window scroll/resize alone would let the toolbar drift off it.
+    if (W.visualViewport) {
+      W.visualViewport.addEventListener('resize', onScroll)
+      W.visualViewport.addEventListener('scroll', onScroll)
+    }
     hookNav(true); render()
     setTimeout(function () { firstRun('Click anything to leave a note.') }, 600)
   }
@@ -908,6 +976,10 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     W.removeEventListener('resize', onScroll)
     W.removeEventListener('popstate', nav)
     W.removeEventListener('storage', onStore)
+    if (W.visualViewport) {
+      W.visualViewport.removeEventListener('resize', onScroll)
+      W.visualViewport.removeEventListener('scroll', onScroll)
+    }
     hookNav(false)
     if (location.hash.indexOf('tack') > -1) history.replaceState(null, '', location.pathname + location.search)
   }
@@ -947,7 +1019,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         id: nid(), path: path(), url: url(), ts: Date.now(),
         selector: sel(t), heading: heading(t), text: txt(t), note: note || '',
         tag: t.tagName.toLowerCase(), cls: cls(t), role: role(t),
-        vw: W.innerWidth, vh: W.innerHeight
+        vw: vp().w, vh: vp().h
       }
       if (edit) n.edit = { a: edit.a || '', from: valOf(t, edit.a || ''), to: edit.to }
       if (picked.length > 1) { n.multi = picked.slice(1).map(sel); picked = [] }

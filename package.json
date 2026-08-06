@@ -1,6 +1,6 @@
 {
   "name": "@kibkalo/tack",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "description": "Click. Comment. Feed to AI. Ultra-lightweight webpage annotation tool.",
   "main": "tack.min.js",
   "unpkg": "tack.min.js",
@@ -28,7 +28,7 @@
     "dev": "astro dev",
     "build": "npm run build:js && cp tack.min.js public/tack.js && astro build",
     "preview": "astro preview",
-    "test:site": "npm run build && node test/site.mjs"
+    "test:site": "npm run build && node test/site.mjs && node test/mobile.mjs"
   },
   "devDependencies": {
     "astro": "^5.0.0",

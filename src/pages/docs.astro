@@ -190,7 +190,7 @@ __tack.off()</code></pre>
     <ul>
       <li>Closed shadow roots cannot be reached by anything outside them, Tack included. Open shadow roots work, and selectors cross them.</li>
       <li>A strict <code>script-src</code> CSP blocks the bookmarklet.</li>
-      <li>Built for desktop browsers. It is not adapted for touch.</li>
+      <li>Designed for a desktop browser. On a phone or tablet the basics do work — tapping an element opens the note popup, and the toolbar, popups and markers are kept on screen and sized for a finger — but the parts that assume a pointer or a keyboard do not: no hover preview of the element you are about to pick, no drag-a-box multi-select, and no <code>↑</code>/<code>↓</code>, shift-click or <code>⌘↵</code>. Touch behaviour is verified in emulated Chrome, not on physical devices.</li>
       <li>Selectors are captured at review time and go stale when markup is restructured — which is exactly why the export ranks text above selectors.</li>
       <li>Notes are stored per browser and per origin. They do not sync between machines; use a review link for that.</li>
       <li>There is no agent sync loop yet: you copy the export into your agent, rather than the agent picking notes up on its own.</li>

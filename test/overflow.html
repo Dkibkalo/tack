@@ -1,0 +1,41 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tack — overflowing host page</title>
+<!--
+  A page that is wider than the phone showing it. This is not exotic: one
+  oversized decoration, one un-wrapping table or one stray 100vw does it, and
+  gettack.dev itself shipped this way. The mobile browser answers by handing out
+  a layout viewport wider than the screen, so anything `position:fixed` to the
+  right or bottom edge is placed outside the visible area.
+
+  Tack is dropped into pages it does not control, so it has to survive this.
+  The assertions live in test/mobile.mjs.
+-->
+<style>
+  body { margin:0; font:16px/1.6 system-ui, sans-serif; }
+  .bleed {                       /* the classic culprit: wider than any phone */
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:900px; height:400px; background:linear-gradient(#eef,#fff);
+    pointer-events:none; z-index:-1;
+  }
+  main { padding:24px; }
+  h1 { font-size:26px; margin:0 0 12px }
+  p { max-width:40em }
+</style>
+
+<div class="bleed"></div>
+<main>
+  <h1 id="title">A page that is wider than your phone</h1>
+  <p id="lead">The decoration behind this text is 900px wide, so the layout viewport
+    is wider than the screen. Tack's toolbar must still be somewhere a thumb can reach.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+  <p>Filler so the page scrolls.</p>
+</main>
+<script src="/tack.js"></script>

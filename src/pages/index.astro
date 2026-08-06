@@ -50,15 +50,20 @@ override this file or your own rules.
 
 <Base
   title="Tack — Click. Comment. Feed to AI."
-  description="Annotate any webpage and hand your AI coding agent exact context. Rewrite text in place, share a review as a link, then check what actually landed. One script tag, 11KB, no dependencies."
+  description="Annotate any webpage and hand your AI coding agent exact context. Rewrite text in place, share a review as a link, then check what actually landed. One script tag, 12KB, no dependencies."
   path="/"
 >
   <style slot="head" is:global>
     /* ===== HERO ===== */
-    .hero { padding:80px 0 50px; text-align:center; position:relative; }
+    /* The glow must never be wider than its box. An overflowing decoration makes
+       the mobile layout viewport wider than the screen, and every right/bottom
+       anchored fixed element — including Tack's own toolbar — lands off-screen.
+       overflow-x:clip is the structural guard; min() is the fix that needs no
+       clip support. Both keep vertical bleed, which overflow:hidden would kill. */
+    .hero { padding:80px 0 50px; text-align:center; position:relative; overflow-x:clip; }
     .hero::after {
       content:''; position:absolute; top:-120px; left:50%; transform:translateX(-50%);
-      width:800px; height:700px;
+      width:min(800px,100%); height:700px;
       background:radial-gradient(ellipse at 50% 40%, rgba(245,158,11,0.06) 0%, rgba(59,130,246,0.02) 35%, transparent 65%);
       pointer-events:none;
     }
@@ -203,6 +208,8 @@ override this file or your own rules.
     .dev-code {
       margin-top:24px; background:var(--surface); border:1px solid var(--border);
       border-radius:10px; padding:18px 22px; font:400 13px/1.6 var(--mono); color:var(--text); max-width:520px;
+      /* the unpkg URL has no break opportunity and overflows a 320px screen */
+      overflow-wrap:anywhere;
     }
     .dev-code .cm { color:var(--text-dim); }
     .dev-code .t { color:var(--blue); }
@@ -210,10 +217,10 @@ override this file or your own rules.
     .dev-code .s { color:#34d399; }
 
     /* ===== TRY IT ===== */
-    .try-it { text-align:center; padding:80px 0 60px; position:relative; }
+    .try-it { text-align:center; padding:80px 0 60px; position:relative; overflow-x:clip; }
     .try-it::before {
       content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-      width:700px; height:350px;
+      width:min(700px,100%); height:350px;
       background:radial-gradient(ellipse, rgba(245,158,11,.04) 0%, transparent 65%);
       pointer-events:none;
     }
@@ -229,20 +236,50 @@ override this file or your own rules.
     .hero-btns { animation-delay:.4s; }
 
     /* ===== RESPONSIVE ===== */
+    .scroll-hint { display:none; }
+
     @media(max-width:768px) {
       .hero { padding:64px 0 40px; }
-      section { padding:72px 0; }
+      section { padding:56px 0; }
       .steps { grid-template-columns:1fr 1fr; }
       .pages-grid { grid-template-columns:1fr; }
       .problem-grid { grid-template-columns:1fr; }
-      .comparison { font-size:11px; }
-      .comparison th,.comparison td { padding:8px 10px; }
       .features { gap:8px; }
-      .feature-pill { font-size:12px; padding:6px 12px; }
+      .feature-pill { font-size:12px; padding:7px 13px; }
+
+      /* Five columns will not fit a phone, so the table scrolls. Shrinking the
+         type to 11px only made it unreadable AND still scrolling; keep it legible
+         and pin the row label instead, so you always know what you are reading. */
+      .scroll-hint { display:block; font-size:12px; color:var(--text-dim); margin-bottom:8px; }
+      .comparison { font-size:12.5px; }
+      .comparison th,.comparison td { padding:9px 12px; white-space:nowrap; }
+      .comparison th:first-child,.comparison td:first-child {
+        position:sticky; left:0; background:var(--bg); z-index:1;
+        box-shadow:1px 0 0 rgba(20,30,58,0.6);
+      }
+      .export-body { max-height:260px; font-size:11.5px; }
     }
+
+    @media(max-width:600px) {
+      /* The demo is a 1000px desktop capture. Inline on a phone it is 340px wide
+         and the UI inside it is unreadable, so give it every pixel there is and
+         let it be opened full screen — see the script below. */
+      .demo-window { margin:0 -24px; border-radius:0; border-left:none; border-right:none; }
+      .demo-chrome { display:none; }
+      .demo-cap { margin-top:12px; }
+    }
+
     @media(max-width:480px) {
       .steps { grid-template-columns:1fr; }
       .hero-btns { flex-direction:column; }
+    }
+
+    /* Fingers, not cursors: the small controls need a real target. */
+    @media(pointer:coarse) {
+      .code-cta .cp { padding:9px 16px; }
+      .footer-links { gap:18px; }
+      .footer-links a { display:inline-block; padding:8px 4px; }
+      .try-list li { padding-top:2px; padding-bottom:2px; }
     }
   </style>
 
@@ -250,7 +287,7 @@ override this file or your own rules.
   <!-- HERO -->
   <div class="wrap">
     <div class="hero">
-      <div class="badge">open source &middot; 11KB &middot; zero deps</div>
+      <div class="badge">open source &middot; 12KB &middot; zero deps</div>
       <h1>Click. Comment.<br/><em>Feed to AI.</em></h1>
       <p class="sub">Annotate any webpage in seconds. Export for ChatGPT, Claude, or Cursor. One script tag — nothing else.</p>
 
@@ -362,7 +399,7 @@ override this file or your own rules.
   <section style="padding-top:60px;padding-bottom:60px;">
     <div class="wrap">
       <div class="features reveal">
-        <span class="feature-pill">11KB gzipped</span>
+        <span class="feature-pill">12KB gzipped</span>
         <span class="feature-pill">Zero dependencies</span>
         <span class="feature-pill">Any framework</span>
         <span class="feature-pill">Never mutates your elements</span>
@@ -472,6 +509,7 @@ override this file or your own rules.
       <div class="section-title reveal">Where Tack wins — and where it doesn't.</div>
       <p class="section-desc reveal">Agentation is the closest thing to Tack, and it's good. It's also a React component you install into your codebase. That single difference decides most of this table.</p>
 
+      <p class="scroll-hint">Swipe the table sideways to see every column &rarr;</p>
       <div class="reveal table-scroll">
         <table class="comparison">
           <thead>
@@ -483,7 +521,7 @@ override this file or your own rules.
             <tr><td>Build step</td><td class="us yes">None</td><td class="no">Required</td><td class="no">Required</td><td class="no">n/a</td></tr>
             <tr><td>Pages you don't own</td><td class="us yes">Yes (bookmarklet)</td><td class="no">No</td><td class="no">Localhost only</td><td>Yes</td></tr>
             <tr><td>Ship to production</td><td class="us yes">Yes, dormant</td><td class="no">Dev-only</td><td class="no">No</td><td class="no">No</td></tr>
-            <tr><td>Size (gzip)</td><td class="us">11 KB</td><td class="no">115 KB</td><td>Extension + server</td><td>Extension</td></tr>
+            <tr><td>Size (gzip)</td><td class="us">12 KB</td><td class="no">115 KB</td><td>Extension + server</td><td>Extension</td></tr>
             <tr><td>License</td><td class="us yes">MIT</td><td class="no">PolyForm Shield</td><td>MIT</td><td class="no">Custom</td></tr>
             <tr><td>Rewrite text in place</td><td class="us yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Share review as a link</td><td class="us yes">Yes, no server</td><td class="no">Needs their server</td><td class="no">No</td><td class="no">No</td></tr>
@@ -534,4 +572,19 @@ override this file or your own rules.
       </ul>
     </div>
   </section>
+
+  <script is:inline>
+    // The demo is a desktop capture. On a phone it renders about a third of its
+    // real size and the UI inside it cannot be read, so hand over the native
+    // controls: full screen in landscape is the only place it is legible.
+    // Desktop keeps the clean autoplaying loop with no chrome over it.
+    (function () {
+      var v = document.querySelector('.demo-video')
+      if (!v || !window.matchMedia) return
+      if (!matchMedia('(pointer:coarse)').matches) return
+      v.setAttribute('controls', '')
+      var cap = document.querySelector('.demo-cap')
+      if (cap) cap.textContent = 'Real capture, not a mockup. Tap full screen to read it.'
+    }())
+  </script>
 </Base>

@@ -1,6 +1,6 @@
 # Tack
 
-> An 11 KB MIT-licensed script that lets a person click elements on any web page,
+> A 12 KB MIT-licensed script that lets a person click elements on any web page,
 > leave notes or rewrite the text in place, and hand an AI coding agent an exact,
 > resolvable description of what to change. One script tag, no build step, no
 > framework requirement, no server, no account. Annotations stay in the browser.

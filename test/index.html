@@ -291,7 +291,38 @@
   T.prefs({ freeze: 0 })
   ok('freeze style goes away', !document.getElementById('tack-freeze'))
 
-  // 20. the library must stay offline through a full workflow
+  // 20. events: the host page can watch a review without the library dialling out,
+  //     and nothing a reviewer typed may ride along in the payload
+  reset()
+  var seen = []
+  var names = ['activate', 'note', 'export', 'download', 'share', 'verify', 'import']
+  var offs = names.map(function (n) {
+    var h = function (e) { seen.push({ n: n, d: e.detail }) }
+    addEventListener('tack:' + n, h)
+    return function () { removeEventListener('tack:' + n, h) }
+  })
+  T.on()
+  T.add(document.getElementById('lead'), 'secret sauce goes here')
+  var evLink = await T.link(false)
+  await T.copy(false)
+  await T.load(evLink)
+  T.applied()
+  var got = seen.map(e => e.n)
+  ok('activate fires', got.indexOf('activate') > -1, got.join(','))
+  ok('note fires', got.indexOf('note') > -1, got.join(','))
+  ok('share fires', got.indexOf('share') > -1, got.join(','))
+  ok('export fires', got.indexOf('export') > -1, got.join(','))
+  ok('import fires', got.indexOf('import') > -1, got.join(','))
+  ok('verify fires', got.indexOf('verify') > -1, got.join(','))
+  var noteEv = seen.filter(e => e.n === 'note')[0]
+  ok('note event counts', noteEv && noteEv.d.here === 1 && noteEv.d.total === 1, JSON.stringify(noteEv && noteEv.d))
+  var payload = JSON.stringify(seen.map(e => e.d))
+  ok('events carry no note text', payload.indexOf('secret sauce') === -1, payload)
+  ok('events carry no selectors', payload.indexOf('#lead') === -1, payload)
+  ok('event payloads are numbers and flags', /^[\[\]{}",:a-z0-9 .truefals-]*$/i.test(payload), payload)
+  offs.forEach(f => f())
+
+  // 21. the library must stay offline through a full workflow
   reset(); T.on()
   T.add(document.getElementById('lead'), 'network guard')
   T.add(document.getElementById('shot'), '', { a: 'alt', to: 'New alt' })

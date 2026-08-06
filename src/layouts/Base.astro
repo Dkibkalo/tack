@@ -57,13 +57,15 @@ const image = new URL(ogImage, site).href
   <script src="/tack.js" is:inline></script>
   <script is:inline>
     // A review link carries its whole payload in the URL fragment. Analytics must
-    // never see it. Page views already report the server-side pathname, but this
-    // strips anything past the path from every report, whatever the source.
+    // never see it, so drop the fragment from every report whatever the source.
+    // The query string stays: it is where campaign parameters live, and cutting
+    // it meant we could not tell where a visitor came from.
     window.webAnalyticsBeforeSend = function (event) {
       try {
         if (event && typeof event.url === 'string') {
           var u = new URL(event.url, location.href);
-          event.url = u.origin + u.pathname;
+          u.hash = '';
+          event.url = u.href;
         }
       } catch (e) {}
       return event;
@@ -85,6 +87,15 @@ const image = new URL(ogImage, site).href
       var t = e.target.closest && e.target.closest('[data-ev-drag]');
       if (t) tk(t.getAttribute('data-ev-drag'));
     });
+
+    // Tack's UI lives in a closed shadow root, so clicks inside it never reach
+    // the [data-ev] listener above and every step past "activated" was invisible
+    // to us. The library reports them as DOM events instead and stays offline;
+    // forwarding them is this page's business, not the library's.
+    ['activate', 'note', 'export', 'download', 'share', 'verify', 'import']
+      .forEach(function (n) {
+        addEventListener('tack:' + n, function () { tk('tack-' + n) });
+      });
   </script>
   <Analytics />
 </body>

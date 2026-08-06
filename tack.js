@@ -252,6 +252,18 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     s.setProperty('--vvw', b.w + 'px')
     s.setProperty('--vvh', b.h + 'px')
   }
+  /**
+   * Tell the host page what just happened, as a plain DOM event on window:
+   * tack:activate, tack:note, tack:export, tack:download, tack:share,
+   * tack:verify, tack:import. Counts only — no note bodies, no selectors, no
+   * page text — because a listener may well forward these to analytics, and
+   * nothing a reviewer typed should be able to leave this way. The library
+   * itself still makes no network request of any kind; if nobody listens,
+   * nothing happens.
+   */
+  function emit (name, detail) {
+    try { W.dispatchEvent(new CustomEvent('tack:' + name, { detail: detail || {} })) } catch (e) {}
+  }
   function el (tag, cls2, txt2) {
     var e = D.createElement(tag); if (cls2) e.className = cls2
     if (txt2 != null) e.textContent = txt2
@@ -669,6 +681,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         if (edit) n.edit = edit
         if (extra && extra.length) n.multi = extra.map(sel)
         notes.push(n); picked = []; save(); render()
+        emit('note', { here: here().length, total: notes.length, edit: !!edit, multi: (n.multi || []).length })
       }
     })
   }
@@ -811,6 +824,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       var ids = {}; list.forEach(n => { ids[n.id] = 1 })
       try { localStorage.setItem('tack_last', JSON.stringify(list)) } catch (e) {}
       notes = notes.filter(n => !ids[n.id]); save(); render()
+      emit('export', { notes: list.length, all: !!all })
       toast('Copied ' + list.length + ' · removed from list', function () {
         notes = notes.concat(list); save(); render()
       })
@@ -823,6 +837,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     a.href = URL.createObjectURL(new Blob([md(list)], { type: 'text/markdown' }))
     a.download = 'tack-review-' + new Date().toISOString().slice(0, 10) + '.md'
     a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+    emit('download', { notes: list.length, all: !!all })
     toast('Downloaded ' + list.length + ' · kept in list')
   }
   function restoreLast () {
@@ -888,6 +903,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     return pack(list).then(function (blob) {
       var link = location.origin + location.pathname + location.search + '#tack=' + blob
       return write(link).then(function () {
+        emit('share', { notes: list.length, chars: link.length })
         toast(link.length > 2000
           ? 'Copied · ' + list.length + ' notes, ' + link.length + ' chars — long links get cut by some chat apps, ☰ Download .md is safer'
           : 'Review link copied · ' + list.length + ' note' + (list.length !== 1 ? 's' : ''))
@@ -905,6 +921,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
         }
       })
       notes = notes.concat(add); save(); render()
+      emit('import', { notes: add.length })
       var msg = 'Imported ' + add.length + ' note' + (add.length !== 1 ? 's' : '')
       if (!firstRun(msg)) toast(msg)
       return add.length
@@ -927,6 +944,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       return { n: n, el: t, st: st }
     })
     render()
+    emit('verify', { checked: last.length, applied: ok, missing: missing })
     toast(ok + ' of ' + last.length + ' look applied' + (missing ? ' · ' + missing + ' element(s) gone' : ''), function () {
       checks = []; render()
     })
@@ -963,6 +981,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       W.visualViewport.addEventListener('scroll', onScroll)
     }
     hookNav(true); render()
+    emit('activate', { notes: here().length })
     setTimeout(function () { firstRun('Click anything to leave a note.') }, 600)
   }
   function off () {
@@ -1004,7 +1023,14 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
     md: function (all) { return md(scope(all)) },
     copy: function (all) { return doCopy(all) },
     share: function (all) { return shareLink(all) },
-    link: function (all) { return pack(scope(all)).then(b => location.origin + location.pathname + location.search + '#tack=' + b) },
+    link: function (all) {
+      var list = scope(all)
+      return pack(list).then(function (b) {
+        var l = location.origin + location.pathname + location.search + '#tack=' + b
+        emit('share', { notes: list.length, chars: l.length })
+        return l
+      })
+    },
     load: function (blob) { if (!active) on(); return importBlob(String(blob).replace(/^.*#tack=/, '')) },
     applied: function () { applied(); return checks.map(c => ({ note: c.n.note, status: c.st })) },
     select: function (list) {
@@ -1025,6 +1051,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
       if (edit) n.edit = { a: edit.a || '', from: valOf(t, edit.a || ''), to: edit.to }
       if (picked.length > 1) { n.multi = picked.slice(1).map(sel); picked = [] }
       notes.push(n); save(); if (active) render()
+      emit('note', { here: here().length, total: notes.length, edit: !!edit, multi: (n.multi || []).length })
       return Object.assign({}, n)
     },
     open: function (elOrSel, opt) {

@@ -518,7 +518,7 @@ override this file or your own rules.
           <tbody>
             <tr><td>Install</td><td class="us">1 script tag</td><td>npm + edit your app</td><td>Extension + MCP</td><td>Extension</td></tr>
             <tr><td>Framework</td><td class="us yes">Any</td><td class="no">React 18+ only</td><td>Any</td><td>Any</td></tr>
-            <tr><td>Build step</td><td class="us yes">None</td><td class="no">Required</td><td class="no">Required</td><td class="no">n/a</td></tr>
+            <tr><td>Build step</td><td class="us yes">None</td><td class="no">Required</td><td class="yes">None</td><td class="yes">None</td></tr>
             <tr><td>Pages you don't own</td><td class="us yes">Yes (bookmarklet)</td><td class="no">No</td><td class="no">Localhost only</td><td>Yes</td></tr>
             <tr><td>Ship to production</td><td class="us yes">Yes, dormant</td><td class="no">Dev-only</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Size (gzip)</td><td class="us">12 KB</td><td class="no">115 KB</td><td>Extension + server</td><td>Extension</td></tr>
@@ -528,11 +528,11 @@ override this file or your own rules.
             <tr><td>Verify what was applied</td><td class="us yes">Yes, offline</td><td class="no">Via MCP only</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Multi-select</td><td class="us yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
             <tr><td>Agent sync loop (MCP)</td><td class="no">Not yet</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
-            <tr><td>React source file + line</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Component source file</td><td class="no">No</td><td class="yes">Yes (React)</td><td class="yes">Yes (React/Vue)</td><td class="no">No</td></tr>
             <tr><td>Layout / wireframe mode</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
           </tbody>
         </table>
-        <p class="table-note">Compared against <b style="color:var(--text);">agentation 3.0.2</b> on 2026-08-05, using its published npm package and docs. Sizes are gzip of the shipped bundle — <code style="font-family:var(--mono);font-size:12px;">gzip -c -9 tack.min.js | wc -c</code> against the same for their <code style="font-family:var(--mono);font-size:12px;">dist/index.mjs</code>. Rows marked as missing mean "not documented", not "impossible". If something here is out of date, <a href="https://github.com/Dkibkalo/tack/issues">open an issue</a> and it gets fixed.</p>
+        <p class="table-note">Compared against <b style="color:var(--text);">agentation 3.0.2</b> on 2026-08-05, using its published npm package and docs; the Vibe Annotations column was re-checked against its own site and repository on 2026-08-06, which corrected two rows in Tack's favour that were wrong in ours. Sizes are gzip of the shipped bundle — <code style="font-family:var(--mono);font-size:12px;">gzip -c -9 tack.min.js | wc -c</code> against the same for their <code style="font-family:var(--mono);font-size:12px;">dist/index.mjs</code>. Rows marked as missing mean "not documented", not "impossible". If something here is out of date, <a href="https://github.com/Dkibkalo/tack/issues">open an issue</a> and it gets fixed.</p>
       </div>
     </div>
   </section>

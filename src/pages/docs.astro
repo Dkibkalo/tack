@@ -34,6 +34,16 @@ const api = [
   ['__tack.clear()', 'Delete every note.'],
 ]
 
+const events = [
+  ['tack:activate', '{notes} — Tack was switched on, with this many notes already on the page.'],
+  ['tack:note', '{here, total, edit, multi} — a note was saved. edit is true for a text rewrite.'],
+  ['tack:export', '{notes, all} — Copy for AI handed the notes over and cleared them.'],
+  ['tack:download', '{notes, all} — the review was saved as a .md file.'],
+  ['tack:share', '{notes, chars} — a review link was produced. chars is its full length.'],
+  ['tack:verify', '{checked, applied, missing} — the applied check ran against the last export.'],
+  ['tack:import', '{notes} — a review link was opened and its notes loaded.'],
+]
+
 const keys = [
   ['⌘⇧F / Ctrl⇧F', 'Toggle Tack on and off'],
   ['⌘↵ / Ctrl↵', 'Save the note you are typing'],
@@ -90,6 +100,7 @@ const keys = [
       <a href="#export">Export format</a>
       <a href="#keyboard">Keyboard</a>
       <a href="#api">JavaScript API</a>
+      <a href="#events">Events</a>
       <a href="#privacy">Privacy</a>
       <a href="#limits">Limits</a>
     </div>
@@ -180,6 +191,18 @@ __tack.add('#hero h1', 'Too vague — name the actual benefit')
 __tack.add('#sub', '', &#123; to: 'Ship your first widget in five minutes.' &#125;)
 const review = __tack.md(false)
 __tack.off()</code></pre>
+
+    <h2 id="events">Events</h2>
+    <p>Tack reports what a reviewer did as plain DOM events on <code>window</code>, so a host page can measure the flow without the library ever making a request. Nothing listens by default, and if nothing listens, nothing happens.</p>
+    <table>
+      <tbody>
+        {events.map(([sig, what]) => (<tr><td><code>{sig}</code></td><td>{what}</td></tr>))}
+      </tbody>
+    </table>
+    <pre><code>addEventListener('tack:export', e =&gt; &#123;
+  analytics.track('review handed over', &#123; notes: e.detail.notes &#125;)
+&#125;)</code></pre>
+    <p>Payloads are counts and flags only — never note bodies, selectors or page text. That is deliberate: a listener will often forward these somewhere, and nothing a reviewer typed should be able to leave that way.</p>
 
     <h2 id="privacy">Privacy</h2>
     <p>The library sends no telemetry and never transmits your annotations. It makes no network requests of any kind — notes live in <code>localStorage</code> under <code>tack_notes</code>, and preferences under <code>tack_prefs</code>. A review link carries its contents inside the URL fragment, which browsers do not send to servers.</p>

@@ -153,6 +153,28 @@ __tack.off()
 
 This is how an agent with browser control reviews a page it doesn't own: load the URL, inject `tack.js`, annotate, read `md()`.
 
+## Events
+
+Tack reports what a reviewer did as plain DOM events on `window`, so a host page can measure the flow without the library ever making a request. Nothing listens by default.
+
+```js
+addEventListener('tack:export', e => {
+  analytics.track('review handed over', {notes: e.detail.notes})
+})
+```
+
+| Event | `event.detail` |
+|---|---|
+| `tack:activate` | `{notes}` — switched on, with this many notes already on the page |
+| `tack:note` | `{here, total, edit, multi}` — a note was saved; `edit` is true for a rewrite |
+| `tack:export` | `{notes, all}` — Copy for AI handed the notes over and cleared them |
+| `tack:download` | `{notes, all}` — saved as a `.md` file |
+| `tack:share` | `{notes, chars}` — a review link was produced |
+| `tack:verify` | `{checked, applied, missing}` — the applied check ran |
+| `tack:import` | `{notes}` — a review link was opened and loaded |
+
+Payloads are counts and flags only — never note bodies, selectors or page text. A listener will often forward these somewhere, and nothing a reviewer typed should be able to leave that way.
+
 ## Keep in Production
 
 Until `#tack` is in the URL hash, Tack registers one idle keyboard listener and stops: no toolbar, no elements added, no network requests, nothing read from the page.
@@ -189,16 +211,16 @@ npm run dev       # landing page
 |---|---|---|---|---|
 | Install | 1 script tag | npm + edit your app | Extension + MCP | Extension |
 | Framework | Any | React 18+ only | Any | Any |
-| Build step | None | Required | Required | n/a |
+| Build step | None | Required | None | None |
 | Pages you don't own | ✓ (bookmarklet) | ✗ | ✗ localhost only | ✓ |
 | Ship to production | ✓ dormant | ✗ dev-only | ✗ | ✗ |
 | Size (gzip) | 12 KB | 115 KB | Extension + server | Extension |
 | License | MIT | PolyForm Shield | MIT | Custom |
 | Agent sync loop (MCP) | ✗ not yet | ✓ | ✓ | ✗ |
-| React source file + line | ✗ | ✓ | ✗ | ✗ |
+| Component source file | ✗ | ✓ React | ✓ React/Vue | ✗ |
 | Layout / wireframe mode | ✗ | ✓ | ✗ | ✗ |
 
-Compared against `agentation@3.0.2` on 2026-08-05, from its published npm package and docs. Sizes are gzip of the shipped bundle (`gzip -c -9` on `tack.min.js` and on their `dist/index.mjs`). A ✗ means "not documented", not "impossible".
+Compared against `agentation@3.0.2` on 2026-08-05, from its published npm package and docs; the Vibe Annotations column was re-checked against its own site and repository on 2026-08-06, correcting two rows that were wrong in our favour. Sizes are gzip of the shipped bundle (`gzip -c -9` on `tack.min.js` and on their `dist/index.mjs`). A ✗ means "not documented", not "impossible".
 
 ## License
 

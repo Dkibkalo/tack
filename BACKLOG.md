@@ -124,9 +124,14 @@ is a product decision, not a mechanical one.
 The recorded demo runs on a light fictional page while the landing is dark. A dark
 variant would sit better, at the cost of re-recording.
 
-### Move the recorder into `tools/record/` — later
-The CDP recorder that produced `demo.mp4` lives in a scratch directory. If the demo is
-meant to be re-recorded per release, it belongs in the repo.
+### Move the recorder into `tools/record/` — next
+The CDP recorder that produced `demo.mp4` lives in a scratch directory. It has now been
+needed twice — the 0.6.0 re-record was forced because the video still showed two tabs in
+the popup, the old untrusted-input wording in the export, and no style editing at all.
+Any release that changes the popup or the export format invalidates the demo, so this is
+a recurring job and the tooling belongs in the repo: `record.mjs`, `cdp.mjs`, the
+fictional demo page, and the ffmpeg encode settings (mp4 1000x482 CRF 26; GIF 10fps,
+64 colours, 700px wide, which lands near 1.1MB for a 17-second take).
 
 ### Hero tagline no longer describes the product — later
 "Click. Comment. Feed to AI." predates rewrite-in-place, share links and verification.

@@ -4,7 +4,7 @@
 
 Ultra-lightweight (15KB) tool to annotate any webpage and export comments for your AI coding assistant. One script tag. Zero dependencies.
 
-![Tack: click an element, rewrite its text, copy the review for your agent](https://gettack.dev/demo.gif)
+![Tack: rewrite an element's text, adjust its size with a live preview, and copy the review for your agent](https://gettack.dev/demo.gif)
 
 ## Quick Start
 

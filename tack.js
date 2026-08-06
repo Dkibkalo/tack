@@ -194,6 +194,7 @@ border:1px solid var(--bd);padding:8px 16px;border-radius:8px;font-size:13px;box
 .menu button{padding:11px 10px} .menu label{padding:10px}
 .hd button{padding:6px 8px} .mini{width:52px;height:52px}
 .mk::after{content:'';position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%)}
+.tst{bottom:calc(80px + var(--vb))} .chip{bottom:calc(136px + var(--vb))}
 }`
 
   function build () {

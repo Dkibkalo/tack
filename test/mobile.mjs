@@ -104,13 +104,23 @@ for (const [width, height, device] of DEVICES) {
       `content ${m.scrollW}px in a ${m.clientW}px viewport` + (m.wide.length ? ' — ' + m.wide.join(', ') : ''))
 
     // The toolbar check only makes sense where Tack is loaded, which is every page.
+    // Clearing storage first also brings back the first-run toast, which shares
+    // the bottom of a phone screen with the toolbar and must not cover it.
+    await b.eval(`localStorage.clear()`)
     await b.eval(`location.hash = 'tack'`)
-    await new Promise(r => setTimeout(r, 700))
+    await new Promise(r => setTimeout(r, 900))
     const bar = await b.boxOf('pill')
     ok(tag + ': toolbar reachable',
       !!bar && bar.left >= 0 && bar.top >= 0 && bar.right <= m.visW + 1 && bar.bottom <= m.visH + 1,
       bar ? `toolbar at ${bar.left},${bar.top} -> ${bar.right},${bar.bottom} on a ${m.visW}x${m.visH} screen`
           : 'toolbar not found')
+
+    const toast = await b.boxOf('tst')
+    const overlaps = bar && toast &&
+      bar.left < toast.right && toast.left < bar.right &&
+      bar.top < toast.bottom && toast.top < bar.bottom
+    ok(tag + ': first-run toast clears the toolbar', !overlaps,
+      toast ? `toast ${toast.left},${toast.top} -> ${toast.right},${toast.bottom} covers the toolbar` : '')
   }
 
   // Tack has to work on pages it does not control, including ones that overflow.

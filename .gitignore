@@ -4,3 +4,8 @@ dist/
 .astro/
 .gstack/
 tools/record/frames/
+
+# Working backlog. Kept out of the repo on purpose: it carries go-to-market plans
+# and half-formed ideas that are nobody else's business, and a public backlog
+# invites arguments about things that were never a commitment.
+BACKLOG.md

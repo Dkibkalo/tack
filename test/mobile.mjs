@@ -103,6 +103,23 @@ for (const [width, height, device] of DEVICES) {
       m.scrollW <= m.clientW + 1,
       `content ${m.scrollW}px in a ${m.clientW}px viewport` + (m.wide.length ? ' — ' + m.wide.join(', ') : ''))
 
+    // This suite is itself the traffic the filter has to drop: it drives a real
+    // browser through every page, and without the guard those visits land in the
+    // analytics we then read as if strangers had made them. Both branches checked —
+    // the second by faking webdriver off, since a real person is what we cannot be here.
+    const send = JSON.parse(await b.eval(`(() => {
+      if (typeof webAnalyticsBeforeSend !== 'function') return JSON.stringify({ missing: true })
+      const probe = location.origin + '/?utm_source=hn#tack=SECRET'
+      const bot = webAnalyticsBeforeSend({ url: probe })
+      Object.defineProperty(Navigator.prototype, 'webdriver', { get: () => false, configurable: true })
+      const human = webAnalyticsBeforeSend({ url: probe })
+      return JSON.stringify({ bot: bot, human: human && human.url })
+    })()`))
+    ok(tag + ': automation is not counted', send.bot === null, JSON.stringify(send.bot))
+    ok(tag + ': a real visit still counts', typeof send.human === 'string', String(send.human))
+    ok(tag + ': campaign params survive', (send.human || '').includes('utm_source=hn'), send.human)
+    ok(tag + ': review payload is stripped', !(send.human || '').includes('SECRET'), send.human)
+
     // The toolbar check only makes sense where Tack is loaded, which is every page.
     // Clearing storage first also brings back the first-run toast, which shares
     // the bottom of a phone screen with the toolbar and must not cover it.

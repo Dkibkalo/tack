@@ -42,7 +42,8 @@ import Base from '../layouts/Base.astro'
 
     <h2>This website</h2>
     <p>gettack.dev uses Vercel Web Analytics to count visits, so we can tell whether anyone is finding the project. It records page views, referrer, country, device type, browser and operating system, and derives a daily visitor hash from the request. It does not use tracking cookies and does not build a cross-site profile of you.</p>
-    <p>Four interactions are counted as events, without any content attached: activating the demo, copying the install snippet, taking the bookmarklet, and following a link out to GitHub or npm.</p>
+    <p>A handful of interactions are counted as events, without any content attached: activating the demo, copying the install snippet, taking the bookmarklet, following a link out to GitHub or npm, and — reported by the library as plain browser events, never over the network — saving a note, copying an export, producing a review link, and running the applied check. Counts only; never note text, selectors or page content.</p>
+    <p>Automated browsers are not counted. Anything reporting <code>navigator.webdriver</code> — our own test and recording runs, and most scrapers — is dropped before it is sent.</p>
     <p>Review links are never reported. If you open a <code>#tack=…</code> link on this site, the fragment stays in your browser and is stripped from anything analytics sees.</p>
     <p>Fonts are served from this domain, so viewing this page does not contact Google or any other third party. The only external request is to unpkg if you install the script from there.</p>
 

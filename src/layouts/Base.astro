@@ -61,6 +61,11 @@ const image = new URL(ogImage, site).href
     // The query string stays: it is where campaign parameters live, and cutting
     // it meant we could not tell where a visitor came from.
     window.webAnalyticsBeforeSend = function (event) {
+      // Automation is not an audience. Headless Chrome driven over CDP — our own
+      // test and recording runs, and most scrapers — sets navigator.webdriver, and
+      // it loads the page and fires events exactly like a person would. Counting it
+      // makes the numbers say whatever we happened to be testing that day.
+      try { if (navigator.webdriver) return null; } catch (e) {}
       try {
         if (event && typeof event.url === 'string') {
           var u = new URL(event.url, location.href);
@@ -78,7 +83,10 @@ const image = new URL(ogImage, site).href
 
     // Custom events: the moments that separate "looked" from "tried".
     // Vercel Analytics exposes window.va once its script has loaded.
-    function tk (name) { try { window.va && window.va('event', { name: name }) } catch (e) {} }
+    function tk (name) {
+      try { if (navigator.webdriver) return } catch (e) {}
+      try { window.va && window.va('event', { name: name }) } catch (e) {}
+    }
     document.addEventListener('click', function (e) {
       var t = e.target.closest && e.target.closest('[data-ev]');
       if (t) tk(t.getAttribute('data-ev'));
